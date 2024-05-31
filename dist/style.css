@@ -1,0 +1,8 @@
+label {
+    display: inline-block;
+    width: 120px;
+}
+
+#loading_msg {
+    display: none;
+}
