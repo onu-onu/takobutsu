@@ -24,23 +24,22 @@ window.onload = () => {
             const token = await graphqlClient.getToken(String(emailTexarea.value), String(passTexarea.value));
             const chart = new Chart();
 
-            let dataSet: any[] = [];
+            let data: any[] = [];
             let today = dayjs();
             for (let i = 0; i < 12; i++) {
                 let lastMonth = today.startOf('month').subtract(i, "month");
                 let startDate = lastMonth.startOf('month').format('YYYY-MM-DDTHH:mm:ssZ[Z]');
                 let endDate = lastMonth.endOf('month').format('YYYY-MM-DDTHH:mm:ssZ[Z]');
-                console.log(startDate, endDate)
-                let data = await graphqlClient.getUsedData(token.token,
+                
+                let oldData = await graphqlClient.getUsedData(token.token,
                     String(userIdTexarea.value),
                     startDate,
                     endDate);
-                if (data.length > 0) {
-                    let preparedData = chart.prepareData(data);
-                    dataSet.push(preparedData);
-                }
+                let preparedData = chart.prepareData(oldData);
+                data = preparedData.concat(data);
             }
-            chart.draw(dataSet);
+            console.log(data);
+            chart.draw(data);
         } catch (error) {
             alert('There is an error in the information you entered.');
         } finally {
