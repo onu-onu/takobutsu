@@ -9,23 +9,33 @@
 <body>
     <div id="login_pane">
         <div>
-            <label for="email">E-mail:</label>
+            <label for="email">メール</label>
             <input type="email" name="email" id="email">
         </div>
 
         <div>
-            <label for="pass">Password:</label>
+            <label for="pass">パスワード</label>
             <input type="password" name="pass" id="pass">
         </div>
 
         <div>
-            <label for="user_id">User Number:</label>
+            <label for="user_id">お客様番号</label>
             <input type="text" name="user_id" id="user_id">
         </div>
         <div>
-            <button id="submit">LOGIN</button>
+            <button id="submit">表示</button>
         </div>
     </div>
     <div id="loading_msg">loading...</div>
-    <div id="my_dataviz"></div>
+    
+    <div id="chart_pane">
+        <div>
+            <h1>今月</h1>
+            <div id="month_chart"></div>
+        </div>
+        <div>
+            <h1>今年</h1>
+            <div id="year_chart"></div>
+        </div>
+    </div>
 </body>

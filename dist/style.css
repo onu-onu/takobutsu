@@ -1,8 +1,11 @@
 label {
     display: inline-block;
-    width: 120px;
+    width: 90px;
 }
 
 #loading_msg {
+    display: none;
+}
+#chart_pane {
     display: none;
 }

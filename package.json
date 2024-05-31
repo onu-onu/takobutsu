@@ -11,8 +11,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/chart.js": "^2.9.41",
-    "chart.js": "^4.4.3",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",
