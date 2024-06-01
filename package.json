@@ -17,7 +17,9 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@types/chroma-js": "^2.4.4",
     "@types/d3": "^7.4.3",
+    "chroma-js": "^2.4.2",
     "d3": "^7.9.0",
     "dayjs": "^1.11.11",
     "graphql-request": "^6.1.0"

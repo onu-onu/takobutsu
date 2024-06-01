@@ -1,10 +1,11 @@
 import * as d3 from 'd3';
-
+import chroma from 'chroma-js';
 
 export class Chart {
     private svg: any;
     private width: number;
     private height: number;
+    private xScale: any = null;
 
     constructor(idName: string, _width: number, _height: number) {
         // set the dimensions and margins of the graph
@@ -13,6 +14,7 @@ export class Chart {
         this.height = _height - margin.top - margin.bottom;
 
         // append the svg object to the body of the page
+        d3.select(idName).selectChild().remove();
         this.svg = d3.select(idName)
             .append('svg')
             .attr('width', this.width + margin.left + margin.right)
@@ -22,19 +24,19 @@ export class Chart {
     }
 
 
-    public drawBar(data: any, yaxisTitle: string) {
+    public drawBar(data: any, yaxisTitle: string, color: string) {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
 
         // Add X axis --> it is a date format
-        const xScale = d3.scaleBand()
+        this.xScale = d3.scaleBand()
             .range([0, width])
             .domain(data.map((d: any) => d.dateStr))
             .padding(0.2);
         let xAxis = svg.append('g')
             .attr('transform', `translate(0, ${height})`)
-            .call(d3.axisBottom(xScale));
+            .call(d3.axisBottom(this.xScale));
         xAxis.selectAll('text')
             .attr('transform', 'rotate(-60)')
             .attr('text-anchor', 'end');
@@ -58,28 +60,30 @@ export class Chart {
         svg.selectAll('mybar')
             .data(data)
             .join('rect')
-            .attr('x', (d: any) => <any>xScale(d.dateStr))
+            .attr('x', (d: any) => <any>this.xScale(d.dateStr))
             .attr('y', (d: any) => yScale(d.value))
-            .attr('width', xScale.bandwidth())
+            .attr('width', this.xScale.bandwidth())
             .attr('height', (d: any) => height - yScale(d.value))
-            .attr('fill', '#d5e1f7')
-            .attr('stroke', '#3477eb');
+            .attr('fill', chroma(color).brighten(2).name())
+            .attr('stroke', color);
     }
 
 
-    public drawLineSub(data: any, yaxisTitle: string) {
+    public drawLineSub(data: any, yaxisTitle: string, color: string) {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
 
-        // Add X axis --> it is a date format
-        const xScale = d3.scaleTime()
-            .range([0, width])
-            .domain(<any>d3.extent(data, (d:any) => d.date));
+
+        // if (this.xScale == null) {
+        //     this.xScale = d3.scaleTime()
+        //         .range([0, width])
+        //         .domain(<any>d3.extent(data, (d: any) => d.date));
+        // }
 
         // Add Y axis
         var yScale = d3.scaleLinear()
-            .domain([0, Number(d3.max(data, (d: any) => +d.value))])
+            .domain([0, Number(d3.max(data, (d: any) => +d.value)) * 2])
             .range([height, 0]);
         svg.append('g')
             .attr('transform', `translate(${width}, 0)`)
@@ -98,11 +102,20 @@ export class Chart {
         svg.append("path")
             .datum(data)
             .attr("fill", "none")
-            .attr('stroke', '#3477eb')
+            .attr('stroke', color)
             .attr("stroke-width", 1.5)
             .attr("d", d3.line()
-                .x((d: any) => <any>xScale(d.date))
+                .x((d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
                 .y((d: any) => yScale(d.value))
             );
+        svg.append('g')
+            .selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", (d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
+            .attr("cy", (d: any) => yScale(d.value))
+            .attr("r", 4)
+            .style("fill", color)
     }
 }

@@ -7,6 +7,7 @@
     <title></title>
 </head>
 <body>
+    <h1>Takobutsu</h1>
     <div id="login_pane">
         <div>
             <label for="email">メール</label>
@@ -26,12 +27,24 @@
             <button id="submit">表示</button>
         </div>
     </div>
+    
+    <div id="legend_pane">
+        <div>
+            <span class="rect blue"></span><span>使用電力量 (kWh)</span>
+            <span class="rect yellow"></span><span>料金 (円)</span>
+        </div>
+    </div>
+
     <div id="loading_msg">loading...</div>
     
     <div id="chart_pane">
         <div>
             <h1>今月</h1>
             <div id="month_chart"></div>
+        </div>
+        <div>
+            <h1>先月</h1>
+            <div id="last_month_chart"></div>
         </div>
         <div>
             <h1>今年</h1>

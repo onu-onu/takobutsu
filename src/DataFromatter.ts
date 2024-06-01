@@ -28,6 +28,28 @@ export class DataFromatter {
             };
         });
     }
+   
+    private aggEstimateCostData(rawData: any[], dayjsFormat: string, d3TimeFormat: string): any {
+        let tmp: any = {}
+        rawData.forEach(d => {
+            let day: string = dayjs(d.startAt)
+                .tz('Asia/Tokyo')
+                .format(dayjsFormat);
+            if (day in tmp) {
+                tmp[day] += Number(d.costEstimate);
+            } else {
+                tmp[day] = Number(d.costEstimate);
+            }
+        });
+        return Object.keys(tmp).map((day: string) => {
+            return {
+                date: d3.timeParse(d3TimeFormat)(day),
+                dateStr: day,
+                value: tmp[day]
+            };
+        });
+    }
+    
 
     private electricEnergy2cost(electricEnergy: number) {
         const costPerKwhStep: number[] = [21.82, 27.19, 29.39];
@@ -47,6 +69,20 @@ export class DataFromatter {
 
     public monthlyElectricEnergyData(rawData: any[]): any {
         return this.aggElectricEnergyData(rawData, 'YYYY-MM', '%Y-%m');
+    }
+
+    public dailyCumulativeTotalEstimateCostData(rawData: any[]): any {
+        let dailyEstimateCost = this.aggEstimateCostData(rawData, 'YYYY-MM-DD', '%Y-%m-%d');
+        
+        let cumulativeTotal = 0;
+        return dailyEstimateCost.map((cost: any) => {
+            cumulativeTotal += Number(cost.value);
+            return {
+                date: cost.date,
+                dateStr: cost.dateStr,
+                value: cumulativeTotal
+            }
+        });
     }
 
     public costData(electricEnergyData: any[]) {

@@ -9,3 +9,19 @@ label {
 #chart_pane {
     display: none;
 }
+
+.rect {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 20%;
+    margin: 0 5px 0 20px;
+    transform: translate(0, 3px);
+}
+
+.blue {
+    background-color: #3477eb;
+}
+.yellow {
+    background-color: #eeff00;
+}
