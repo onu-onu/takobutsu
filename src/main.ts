@@ -16,6 +16,8 @@ window.onload = () => {
     const passTexarea: HTMLInputElement = <HTMLInputElement>document.querySelector('#pass');
     const userIdTexarea: HTMLInputElement = <HTMLInputElement>document.querySelector('#user_id');
 
+    // sample();
+    // return;
 
     let params: any = {}
     location.search.replace('?', '').split('&').forEach(param => {
@@ -34,7 +36,7 @@ window.onload = () => {
     submitBtn.addEventListener('click', async () => {
         drawChart(String(emailTexarea.value), String(passTexarea.value), String(userIdTexarea.value));
     });
-    // sample();
+    
 }
 
 async function drawChart(email: string, pass: string, id: string) {
@@ -94,6 +96,9 @@ async function drawChart(email: string, pass: string, id: string) {
         chart1.drawBar(monthlyEeData, 'kWh', '#3477eb');
         chart1.drawLineSub(monthlyCostData, 'cost(yen)', '#eeff00');
         chartPane.style.display = 'block';
+
+        const chart3 = new Chart('#heatmap', 600, 300);
+        chart3.drawCalHeatmap(dailyEeData);
     } catch (error) {
         alert('There is an error in the information you entered.');
     } finally {
@@ -107,17 +112,20 @@ function sample() {
         .then(data => {
             const dataFormatter = new DataFromatter();
             let dailyData = dataFormatter.dailyElectricEnergyData(data);
-            dailyData = dataFormatter.slice(dailyData, '2024-01-01 00:00:00', '2024-1-31 23:59:59');
+            let thisMDailyData = dataFormatter.slice(dailyData, '2024-01-01 00:00:00', '2024-1-31 23:59:59');
             let monthlyData = dataFormatter.monthlyElectricEnergyData(data);
             let costData = dataFormatter.costData(monthlyData);
             let dailyCumulativeTotalCostData = dataFormatter.dailyCumulativeTotalEstimateCostData(data);
-            console.log(dailyCumulativeTotalCostData)
+            
             const chart0 = new Chart('#month_chart', 600, 400);
             const chart1 = new Chart('#year_chart', 600, 600);
-            chart0.drawBar(dailyData, 'kWh', '#3477eb');
+            chart0.drawBar(thisMDailyData, 'kWh', '#3477eb');
             chart0.drawLineSub(dailyCumulativeTotalCostData, 'Cost (Yen)', '#3477eb');
             chart1.drawBar(monthlyData, 'kWh', '#3477eb');
             chart1.drawLineSub(costData, 'Cost (Yen)', '#3477eb');
+
+            const chart3 = new Chart('#heatmap', 600, 300);
+            chart3.drawCalHeatmap(dailyData);
 
             const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
             chartPane.style.display = 'block';

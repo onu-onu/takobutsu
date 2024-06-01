@@ -1,5 +1,12 @@
 import * as d3 from 'd3';
 import chroma from 'chroma-js';
+import dayjs from 'dayjs';
+// UTCを使うためのおまじない
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
+// タイムゾーンを使うためのおまじない
+import timezone from 'dayjs/plugin/timezone';
+dayjs.extend(timezone);
 
 export class Chart {
     private svg: any;
@@ -9,7 +16,7 @@ export class Chart {
 
     constructor(idName: string, _width: number, _height: number) {
         // set the dimensions and margins of the graph
-        var margin = { top: 50, right: 50, bottom: 100, left: 50 };
+        let margin = { top: 50, right: 50, bottom: 100, left: 50 };
         this.width = _width - margin.left - margin.right;
         this.height = _height - margin.top - margin.bottom;
 
@@ -42,7 +49,7 @@ export class Chart {
             .attr('text-anchor', 'end');
 
         // Add Y axis
-        var yScale = d3.scaleLinear()
+        let yScale = d3.scaleLinear()
             .domain([0, Number(d3.max(data, (d: any) => +d.value))])
             .range([height, 0]);
         svg.append('g')
@@ -82,7 +89,7 @@ export class Chart {
         // }
 
         // Add Y axis
-        var yScale = d3.scaleLinear()
+        let yScale = d3.scaleLinear()
             .domain([0, Number(d3.max(data, (d: any) => +d.value)) * 2])
             .range([height, 0]);
         svg.append('g')
@@ -117,5 +124,79 @@ export class Chart {
             .attr("cy", (d: any) => yScale(d.value))
             .attr("r", 4)
             .style("fill", color)
+    }
+
+    public drawCalHeatmap(data: any) {
+        data = this.prepareDataForHeatmap(data);
+        const svg = this.svg;
+        const width = this.width;
+        const height = this.height;
+
+        let weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        let x = d3.scaleBand()
+            .range([0, width])
+            .domain(Array.from(new Set(data.map((d: any) => d.weekID))))
+            .padding(0.1);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .attr('id', 'heatmap_xaxis')
+            .call(d3.axisBottom(x).tickFormat((d: any) => d.split('-')[0]));
+
+        let monthChecks: string[] = []
+        document.querySelectorAll('#heatmap_xaxis text')
+            .forEach((text: any) => {
+                let month = text.textContent
+                if (!monthChecks.includes(month)) {
+                    monthChecks.push(month);
+                } else {
+                    text.remove()
+                }
+            });
+
+        // Build X scales and axis:
+        let y = d3.scaleBand()
+            .range([0, height])
+            .domain(weekday)
+            .padding(0.1);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        // Build color scale
+        let myColor = d3.scaleLinear()
+            .range(<any>["white", "#3477eb"])
+            .domain([0, Number(d3.max(data, (d: any) => +d.value))])
+
+
+        svg.selectAll()
+            .data(data, (d: any) => d.weekID + ':' + d.weekday)
+            .enter()
+            .append("rect")
+            .attr("x", (d: any) => x(d.weekID))
+            .attr("y", (d: any) => y(d.weekday))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", (d: any) => myColor(d.value))
+            .attr('rx', 2)
+            .attr('ry', 2);
+    }
+
+    private prepareDataForHeatmap(data: any[]): any[] {
+        let weekNum: number = -1;
+        let repDate = data[0].dateStr;
+        return data.map((d: any) => {
+            let weekday = dayjs(d.dateStr).format("ddd");
+            let month = dayjs(d.dateStr).format('MMM');
+            if (weekday == 'Mon') {
+                weekNum++;
+                repDate = d.dateStr;
+            }
+            return {
+                weekday: weekday,
+                weekID: dayjs(repDate).format('MMM-dd'),
+                // weekID: `${month}-${weekNum}`,
+                value: d.value
+            }
+        });
     }
 }

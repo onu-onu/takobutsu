@@ -1,4 +1,3 @@
-import * as d3 from 'd3';
 import dayjs from 'dayjs';
 // UTCを使うためのおまじない
 import utc from 'dayjs/plugin/utc';
@@ -8,7 +7,7 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(timezone);
 
 export class DataFromatter {
-    private aggElectricEnergyData(rawData: any[], dayjsFormat: string, d3TimeFormat: string): any {
+    private aggElectricEnergyData(rawData: any[], dayjsFormat: string): any {
         let tmp: any = {}
         rawData.forEach(d => {
             let day: string = dayjs(d.startAt)
@@ -22,14 +21,13 @@ export class DataFromatter {
         });
         return Object.keys(tmp).map((day: string) => {
             return {
-                date: d3.timeParse(d3TimeFormat)(day),
                 dateStr: day,
                 value: tmp[day]
             };
         });
     }
    
-    private aggEstimateCostData(rawData: any[], dayjsFormat: string, d3TimeFormat: string): any {
+    private aggEstimateCostData(rawData: any[], dayjsFormat: string): any {
         let tmp: any = {}
         rawData.forEach(d => {
             let day: string = dayjs(d.startAt)
@@ -43,7 +41,6 @@ export class DataFromatter {
         });
         return Object.keys(tmp).map((day: string) => {
             return {
-                date: d3.timeParse(d3TimeFormat)(day),
                 dateStr: day,
                 value: tmp[day]
             };
@@ -64,21 +61,20 @@ export class DataFromatter {
     }
 
     public dailyElectricEnergyData(rawData: any[]): any {
-        return this.aggElectricEnergyData(rawData, 'YYYY-MM-DD', '%Y-%m-%d');
+        return this.aggElectricEnergyData(rawData, 'YYYY-MM-DD');
     }
 
     public monthlyElectricEnergyData(rawData: any[]): any {
-        return this.aggElectricEnergyData(rawData, 'YYYY-MM', '%Y-%m');
+        return this.aggElectricEnergyData(rawData, 'YYYY-MM');
     }
 
     public dailyCumulativeTotalEstimateCostData(rawData: any[]): any {
-        let dailyEstimateCost = this.aggEstimateCostData(rawData, 'YYYY-MM-DD', '%Y-%m-%d');
+        let dailyEstimateCost = this.aggEstimateCostData(rawData, 'YYYY-MM-DD');
         
         let cumulativeTotal = 0;
         return dailyEstimateCost.map((cost: any) => {
             cumulativeTotal += Number(cost.value);
             return {
-                date: cost.date,
                 dateStr: cost.dateStr,
                 value: cumulativeTotal
             }
