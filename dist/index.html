@@ -1,4 +1,5 @@
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -6,52 +7,60 @@
     <link rel="stylesheet" href="style.css">
     <title>Takobutsu</title>
 </head>
+
 <body>
-    <h1>Takobutsu</h1>
-    <div id="login_pane">
-        <div>
-            <label for="email">メール</label>
-            <input type="email" name="email" id="email">
+    <div id="main">
+        <h1>Takobutsu</h1>
+        <div id="login_pane" class="pane">
+            <div>
+                <input type="email" name="email" id="email" placeholder="メールアドレス">
+            </div>
+
+            <div>
+                <input type="password" name="pass" id="pass" placeholder="パスワード">
+            </div>
+
+            <div>
+                <input type="text" name="user_id" id="user_id" placeholder="お客様番号">
+            </div>
+            <div>
+                <button id="submit">GO</button>
+            </div>
         </div>
 
-        <div>
-            <label for="pass">パスワード</label>
-            <input type="password" name="pass" id="pass">
-        </div>
 
-        <div>
-            <label for="user_id">お客様番号</label>
-            <input type="text" name="user_id" id="user_id">
-        </div>
-        <div>
-            <button id="submit">表示</button>
-        </div>
-    </div>
-    
-    <div id="legend_pane">
-        <div>
-            <span class="rect blue"></span><span>使用電力量 (kWh)</span>
-            <span class="rect yellow"></span><span>料金 (円)</span>
-        </div>
-    </div>
 
-    <div id="loading_msg">loading...</div>
-    
-    <div id="chart_pane">
-        <div>
-            <h1>今月</h1>
-            <div id="month_chart"></div>
-        </div>
-        <div>
-            <h1>先月</h1>
-            <div id="last_month_chart"></div>
-        </div>
-        <div>
-            <h1>今年</h1>
-            <div id="year_chart"></div>
-        </div>
-        <div>
-            <div id="heatmap"></div>
+        <div id="loading_msg">loading...</div>
+
+        <div id="chart_pane" class="pane">
+            <div id="selector_pane">
+                <input type="radio" name="chart_select" id="month_chart_slct" checked>
+                <label for="month_chart_slct">今月</label>
+                <input type="radio" name="chart_select" id="last_month_chart_slct">
+                <label for="last_month_chart_slct">先月</label>
+                <input type="radio" name="chart_select" id="year_chart_slct">
+                <label for="year_chart_slct">今年</label>
+            </div>
+
+            <div id="legend_pane" class="pane">
+                <div>
+                    <span class="rect blue"></span><span>使用電力量 (kWh)</span>
+                    <span class="rect yellow"></span><span>料金 (円)</span>
+                </div>
+            </div>
+
+            <div>
+                <div id="month_chart"></div>
+            </div>
+            <div>
+                <div id="last_month_chart"></div>
+            </div>
+            <div>
+                <div id="year_chart"></div>
+            </div>
+            <div>
+                <div id="heatmap"></div>
+            </div>
         </div>
     </div>
 </body>

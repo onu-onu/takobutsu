@@ -16,7 +16,11 @@ window.onload = () => {
     const passTexarea: HTMLInputElement = <HTMLInputElement>document.querySelector('#pass');
     const userIdTexarea: HTMLInputElement = <HTMLInputElement>document.querySelector('#user_id');
 
-    // sample();
+    const body: HTMLElement = <HTMLElement>document.querySelector('body');
+    const loginPane: HTMLElement = <HTMLElement>document.querySelector('#login_pane');
+
+    // loginPane.style.display = 'none';
+    // sample(body.clientWidth);
     // return;
 
     let params: any = {}
@@ -27,19 +31,21 @@ window.onload = () => {
         params[key] = String(value);
     });
     if (Object.keys(params).length == 3) {
-        drawChart(params.mail, params.pass, params.id);
+        loginPane.style.display = 'none';
+        drawChart(params.mail, params.pass, params.id, body.clientWidth);
         emailTexarea.value = params.mail;
         passTexarea.value = params.pass;
         userIdTexarea.value = params.id;
     }
 
     submitBtn.addEventListener('click', async () => {
-        drawChart(String(emailTexarea.value), String(passTexarea.value), String(userIdTexarea.value));
+        loginPane.style.display = 'none';
+        drawChart(String(emailTexarea.value), String(passTexarea.value), String(userIdTexarea.value), body.clientWidth);
     });
     
 }
 
-async function drawChart(email: string, pass: string, id: string) {
+async function drawChart(email: string, pass: string, id: string, width: number) {
     const loadingMsgBox: HTMLElement = <HTMLElement>document.querySelector('#loading_msg');
     const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
     const graphqlClient = new GraphQLFetcher();
@@ -73,7 +79,7 @@ async function drawChart(email: string, pass: string, id: string) {
             monthlyCostData = monthlyCost.concat(monthlyCostData);
         }
 
-        const chart0 = new Chart('#month_chart', 600, 400);
+        const chart0 = new Chart('#month_chart', width, 400);
         let thisMonthStartDate = today.startOf('month').format('YYYY-MM-DD HH:mm:ss');
         let thisMonthEndDate = today.endOf('month').format('YYYY-MM-DD HH:mm:ss');
         let thisMoththDailyEeData = dataFormatter.slice(dailyEeData, thisMonthStartDate, thisMonthEndDate);
@@ -81,7 +87,7 @@ async function drawChart(email: string, pass: string, id: string) {
         chart0.drawBar(thisMoththDailyEeData, 'kWh', '#3477eb');
         chart0.drawLineSub(thisMoththDailyCostData, 'cost(yen)', '#eeff00');
 
-        const chart2 = new Chart('#last_month_chart', 600, 400);
+        const chart2 = new Chart('#last_month_chart', width, 400);
         let lastMonth = today.subtract(1, 'month');
         let lastMonthStartDate = lastMonth.startOf('month').format('YYYY-MM-DD HH:mm:ss');
         let lastMonthEndDate = lastMonth.endOf('month').format('YYYY-MM-DD HH:mm:ss');
@@ -90,14 +96,14 @@ async function drawChart(email: string, pass: string, id: string) {
         chart2.drawBar(lastMoththDailyEeData, 'kWh', '#3477eb');
         chart2.drawLineSub(lastMoththDailyCostData, 'cost(yen)', '#eeff00');
 
-        const chart1 = new Chart('#year_chart', 600, 600);
+        const chart1 = new Chart('#year_chart', width, 600);
         console.log(monthlyEeData)
         console.log(monthlyCostData)
         chart1.drawBar(monthlyEeData, 'kWh', '#3477eb');
         chart1.drawLineSub(monthlyCostData, 'cost(yen)', '#eeff00');
         chartPane.style.display = 'block';
 
-        const chart3 = new Chart('#heatmap', 600, 300);
+        const chart3 = new Chart('#heatmap', width, 300);
         chart3.drawCalHeatmap(dailyEeData);
     } catch (error) {
         alert('There is an error in the information you entered.');
@@ -106,7 +112,7 @@ async function drawChart(email: string, pass: string, id: string) {
     }
 }
 
-function sample() {
+function sample(w: number) {
     fetch('../tool/sample_data.json')
         .then(res => res.json())
         .then(data => {
@@ -117,14 +123,14 @@ function sample() {
             let costData = dataFormatter.costData(monthlyData);
             let dailyCumulativeTotalCostData = dataFormatter.dailyCumulativeTotalEstimateCostData(data);
             
-            const chart0 = new Chart('#month_chart', 600, 400);
-            const chart1 = new Chart('#year_chart', 600, 600);
+            const chart0 = new Chart('#month_chart', w, 400);
+            const chart1 = new Chart('#year_chart', w, 600);
             chart0.drawBar(thisMDailyData, 'kWh', '#3477eb');
             chart0.drawLineSub(dailyCumulativeTotalCostData, 'Cost (Yen)', '#3477eb');
             chart1.drawBar(monthlyData, 'kWh', '#3477eb');
             chart1.drawLineSub(costData, 'Cost (Yen)', '#3477eb');
 
-            const chart3 = new Chart('#heatmap', 600, 300);
+            const chart3 = new Chart('#heatmap', w, 300);
             chart3.drawCalHeatmap(dailyData);
 
             const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');

@@ -1,3 +1,16 @@
+body {
+    background: #1e2a38;
+    color: #eee;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+#main {
+    /* width: 100%;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0); */
+}
 label {
     display: inline-block;
     width: 90px;
@@ -24,4 +37,70 @@ label {
 }
 .yellow {
     background-color: #eeff00;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 200%;
+    text-align: center;
+    width: 100vw;
+    /* text-decoration-line: underline overline; */
+    margin: 0;
+    padding: 10px;
+}
+.pane{
+    margin: 20px 0;
+}
+#login_pane,
+#selector_pane,
+#legend_pane {
+    text-align: center;
+}
+
+input[type="email"],
+input[type="text"],
+input[type="password"]{
+    background: #1e2a38;
+    border: #eeff00 solid 1px;
+    border-radius: 10px;
+    margin: 5px 0;
+    height: 30px;
+    width: 300px;
+    color: #eee;
+    text-align: center;
+}
+::placeholder {
+    color: #ccc;
+    font-weight: bold;
+    text-align: center;
+}
+input[type="radio"] {
+    display: none;
+}
+
+#selector_pane label {
+    display: inline-block;
+    background-color: #1e2a38;
+    border: #eee solid 1px;
+    border-radius: 10px;
+    color: #eee;
+    width: 100px;
+    height: auto;
+    margin: 10px 0px;
+    font-weight: bold;
+}
+#selector_pane input[type="radio"]:checked+label {
+    background-color: #eeff00;
+    border-color: #eeff00;
+    color: #050e18;
+}
+button {
+    background-color: #eeff00;
+    border: #eeff00 solid 1px;
+    border-radius: 10px;
+    color: #050e18;
+    width: 100px;
+    height: 30px;
+    margin: 10px 0px;
+    font-weight: bold;
 }
