@@ -136,7 +136,7 @@ export class Chart {
 
         let x = d3.scaleBand()
             .range([0, width])
-            .domain(Array.from(new Set(data.map((d: any) => d.weekID))))
+            .domain(Array.from(new Set(data.map((d: any) => d.representDate))))
             .padding(0.1);
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
@@ -167,12 +167,21 @@ export class Chart {
             .range(<any>["white", "#3477eb"])
             .domain([0, Number(d3.max(data, (d: any) => +d.value))])
 
+        let colorScale = (d: any) => {
+            let valueMax = Number(d3.max(data, (d: any) => +d.value));
+            let month = Number(dayjs(d.date).format('M'));
+            let s: number = d.value / valueMax;
+            let h: number = month / 12 * 360;
+            let v: number = 0.9;
+            return chroma.hsv(h, s, v).name();
+        }
+
 
         svg.selectAll()
-            .data(data, (d: any) => d.weekID + ':' + d.weekday)
+            .data(data, (d: any) => d.representDate + ':' + d.weekday)
             .enter()
             .append("rect")
-            .attr("x", (d: any) => x(d.weekID))
+            .attr("x", (d: any) => x(d.representDate))
             .attr("y", (d: any) => y(d.weekday))
             .attr("width", x.bandwidth())
             .attr("height", y.bandwidth())
@@ -182,19 +191,16 @@ export class Chart {
     }
 
     private prepareDataForHeatmap(data: any[]): any[] {
-        let weekNum: number = -1;
         let repDate = data[0].dateStr;
         return data.map((d: any) => {
             let weekday = dayjs(d.dateStr).format("ddd");
-            let month = dayjs(d.dateStr).format('MMM');
             if (weekday == 'Mon') {
-                weekNum++;
                 repDate = d.dateStr;
             }
             return {
                 weekday: weekday,
-                weekID: dayjs(repDate).format('MMM-dd'),
-                // weekID: `${month}-${weekNum}`,
+                representDate: dayjs(repDate).format('MMM-DD'),
+                date: d.dateStr,
                 value: d.value
             }
         });
