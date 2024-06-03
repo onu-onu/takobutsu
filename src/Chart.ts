@@ -15,12 +15,10 @@ export class Chart {
     private xScale: any = null;
 
     constructor(idName: string, _width: number, _height: number) {
-        // set the dimensions and margins of the graph
-        let margin = { top: 50, right: 50, bottom: 100, left: 50 };
+        let margin = { top: 20, right: 50, bottom: 60, left: 50 };
         this.width = _width - margin.left - margin.right;
         this.height = _height - margin.top - margin.bottom;
 
-        // append the svg object to the body of the page
         d3.select(idName).selectChild().remove();
         this.svg = d3.select(idName)
             .append('svg')
@@ -36,33 +34,14 @@ export class Chart {
         const width = this.width;
         const height = this.height;
 
-        // Add X axis --> it is a date format
         this.xScale = d3.scaleBand()
             .range([0, width])
             .domain(data.map((d: any) => d.dateStr))
             .padding(0.2);
-        let xAxis = svg.append('g')
-            .attr('transform', `translate(0, ${height})`)
-            .call(d3.axisBottom(this.xScale));
-        xAxis.selectAll('text')
-            .attr('transform', 'rotate(-60)')
-            .attr('text-anchor', 'end');
 
-        // Add Y axis
         let yScale = d3.scaleLinear()
             .domain([0, Number(d3.max(data, (d: any) => +d.value))])
             .range([height, 0]);
-        svg.append('g')
-            .call(d3.axisLeft(yScale));
-        svg.append('text')
-            .attr('x', 0)
-            .attr('y', -10)
-            .attr('text-anchor', 'top')
-            .attr('text-align', 'center')
-            .attr('font-size', `12px`)
-            // .attr('font-family', 'Arial')
-            // .attr('font-weight', 'nomal')
-            .text(yaxisTitle);
 
         svg.selectAll('mybar')
             .data(data)
@@ -71,8 +50,30 @@ export class Chart {
             .attr('y', (d: any) => yScale(d.value))
             .attr('width', this.xScale.bandwidth())
             .attr('height', (d: any) => height - yScale(d.value))
-            .attr('fill', chroma(color).brighten(2).name())
-            .attr('stroke', color);
+            .attr('fill', color)
+            .attr('stroke', color)
+            .attr('rx', 5)
+            .attr('ry', 5);
+
+        svg.append('g')
+            .call(d3.axisLeft(yScale).ticks(10));
+        svg.append('text')
+            .attr('x', 0)
+            .attr('y', -10)
+            .attr('text-anchor', 'top')
+            .attr('text-align', 'center')
+            .attr('font-size', `12px`)
+            .style('color', '#eee')
+            .text(yaxisTitle);
+
+        let xAxis = svg.append('g')
+            .attr('transform', `translate(0, ${height})`)
+            .call(d3.axisBottom(this.xScale));
+        xAxis.selectAll('text')
+            .attr('transform', 'rotate(-60)')
+            .attr('text-anchor', 'end');
+
+        svg.selectAll('text').style('color', '#eee');
     }
 
 
@@ -80,13 +81,6 @@ export class Chart {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
-
-
-        // if (this.xScale == null) {
-        //     this.xScale = d3.scaleTime()
-        //         .range([0, width])
-        //         .domain(<any>d3.extent(data, (d: any) => d.date));
-        // }
 
         // Add Y axis
         let yScale = d3.scaleLinear()
@@ -101,8 +95,7 @@ export class Chart {
             .attr('text-anchor', 'end')
             .attr('text-align', 'center')
             .attr('font-size', `12px`)
-            // .attr('font-family', 'Arial')
-            // .attr('font-weight', 'nomal')
+            .style('color', '#eee')
             .text(yaxisTitle);
 
 
@@ -110,7 +103,7 @@ export class Chart {
             .datum(data)
             .attr("fill", "none")
             .attr('stroke', color)
-            .attr("stroke-width", 1.5)
+            .attr("stroke-width", 3)
             .attr("d", d3.line()
                 .x((d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
                 .y((d: any) => yScale(d.value))
@@ -122,11 +115,13 @@ export class Chart {
             .append("circle")
             .attr("cx", (d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
             .attr("cy", (d: any) => yScale(d.value))
-            .attr("r", 4)
-            .style("fill", color)
+            .attr("r", 5)
+            .style("fill", color);
+
+        svg.selectAll('text').style('color', '#eee');
     }
 
-    public drawCalHeatmap(data: any) {
+    public drawCalHeatmap(data: any, color0: string, color1: string) {
         data = this.prepareDataForHeatmap(data);
         const svg = this.svg;
         const width = this.width;
@@ -150,7 +145,7 @@ export class Chart {
                 if (!monthChecks.includes(month)) {
                     monthChecks.push(month);
                 } else {
-                    text.remove()
+                    text.remove();
                 }
             });
 
@@ -158,24 +153,14 @@ export class Chart {
         let y = d3.scaleBand()
             .range([0, height])
             .domain(weekday)
-            .padding(0.1);
+            .padding(0.2);
         svg.append("g")
             .call(d3.axisLeft(y));
 
         // Build color scale
         let myColor = d3.scaleLinear()
-            .range(<any>["white", "#3477eb"])
+            .range(<any>[color1, color0])
             .domain([0, Number(d3.max(data, (d: any) => +d.value))])
-
-        let colorScale = (d: any) => {
-            let valueMax = Number(d3.max(data, (d: any) => +d.value));
-            let month = Number(dayjs(d.date).format('M'));
-            let s: number = d.value / valueMax;
-            let h: number = month / 12 * 360;
-            let v: number = 0.9;
-            return chroma.hsv(h, s, v).name();
-        }
-
 
         svg.selectAll()
             .data(data, (d: any) => d.representDate + ':' + d.weekday)
@@ -186,8 +171,8 @@ export class Chart {
             .attr("width", x.bandwidth())
             .attr("height", y.bandwidth())
             .style("fill", (d: any) => myColor(d.value))
-            .attr('rx', 2)
-            .attr('ry', 2);
+            .attr('rx', 5)
+            .attr('ry', 5);
     }
 
     private prepareDataForHeatmap(data: any[]): any[] {

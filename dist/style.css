@@ -4,12 +4,8 @@ body {
     margin: 0;
     padding: 0;
     position: relative;
-}
-#main {
-    /* width: 100%;
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, 0); */
+    width: 100vw;
+    text-align: center;
 }
 label {
     display: inline-block;
@@ -33,7 +29,7 @@ label {
 }
 
 .blue {
-    background-color: #3477eb;
+    background-color: #c1d0e6;
 }
 .yellow {
     background-color: #eeff00;
@@ -46,15 +42,23 @@ h1 {
     width: 100vw;
     /* text-decoration-line: underline overline; */
     margin: 0;
-    padding: 10px;
+    padding: 20px 0 0 0;
+}
+
+#info {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    /* text-align: center; */
+    font-size: 80%;
+    margin: 5px;
+}
+a {
+    color: #eee;
 }
 .pane{
     margin: 20px 0;
-}
-#login_pane,
-#selector_pane,
-#legend_pane {
-    text-align: center;
 }
 
 input[type="email"],
@@ -90,6 +94,8 @@ input[type="radio"] {
     font-weight: bold;
 }
 #selector_pane input[type="radio"]:checked+label {
+    /* background-color: #eee; */
+    /* border-color: #eee; */
     background-color: #eeff00;
     border-color: #eeff00;
     color: #050e18;
@@ -103,4 +109,15 @@ button {
     height: 30px;
     margin: 10px 0px;
     font-weight: bold;
+}
+
+#last_month_chart {
+    display: none;
+}
+#year_charts {
+    display: none;
+}
+
+text {
+    color: #eee;
 }
