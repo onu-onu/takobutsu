@@ -85,7 +85,6 @@ export class DataFromatter {
         return electricEnergyData.map((ee: any) => {
             return {
                 value: this.electricEnergy2cost(ee.value),
-                date: ee.date,
                 dateStr: ee.dateStr
             }
         });

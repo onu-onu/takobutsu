@@ -15,7 +15,7 @@ export class Chart {
     private xScale: any = null;
 
     constructor(idName: string, _width: number, _height: number) {
-        let margin = { top: 20, right: 50, bottom: 60, left: 50 };
+        let margin = { top: 20, right: 50, bottom: 80, left: 50 };
         this.width = _width - margin.left - margin.right;
         this.height = _height - margin.top - margin.bottom;
 
@@ -33,6 +33,7 @@ export class Chart {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
+        console.log(data)
 
         this.xScale = d3.scaleBand()
             .range([0, width])
@@ -40,7 +41,7 @@ export class Chart {
             .padding(0.2);
 
         let yScale = d3.scaleLinear()
-            .domain([0, Number(d3.max(data, (d: any) => +d.value))])
+            .domain([0, Number(d3.max(data, (d: any) => +Number(d.value)))])
             .range([height, 0]);
 
         svg.selectAll('mybar')
@@ -70,7 +71,7 @@ export class Chart {
             .attr('transform', `translate(0, ${height})`)
             .call(d3.axisBottom(this.xScale));
         xAxis.selectAll('text')
-            .attr('transform', 'rotate(-60)')
+            .attr('transform', `translate(${-this.xScale.bandwidth() / 2}, 5)rotate(-60)`)
             .attr('text-anchor', 'end');
 
         svg.selectAll('text').style('color', '#eee');

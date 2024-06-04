@@ -7,6 +7,7 @@ body {
     width: 100vw;
     text-align: center;
 }
+
 label {
     display: inline-block;
     width: 90px;
@@ -15,6 +16,7 @@ label {
 #loading_msg {
     display: none;
 }
+
 #chart_pane {
     display: none;
 }
@@ -31,6 +33,7 @@ label {
 .blue {
     background-color: #c1d0e6;
 }
+
 .yellow {
     background-color: #eeff00;
 }
@@ -46,24 +49,26 @@ h1 {
 }
 
 #info {
-    position: absolute;
-    bottom: 0px;
+    position: fixed;
+    bottom: 10px;
     left: 50%;
     transform: translate(-50%, 0);
     /* text-align: center; */
     font-size: 80%;
-    margin: 5px;
+    margin: 10px;
 }
+
 a {
     color: #eee;
 }
-.pane{
+
+.pane {
     margin: 20px 0;
 }
 
 input[type="email"],
 input[type="text"],
-input[type="password"]{
+input[type="password"] {
     background: #1e2a38;
     border: #eeff00 solid 1px;
     border-radius: 10px;
@@ -73,13 +78,26 @@ input[type="password"]{
     color: #eee;
     text-align: center;
 }
+
 ::placeholder {
     color: #ccc;
     font-weight: bold;
     text-align: center;
 }
+
 input[type="radio"] {
     display: none;
+}
+
+select {
+    background: #1e2a38;
+    border: #eee solid 1px;
+    border-radius: 8px;
+    margin: 5px 0;
+    height: 22px;
+    width: 80px;
+    color: #eee;
+    text-align: center;
 }
 
 #selector_pane label {
@@ -93,6 +111,7 @@ input[type="radio"] {
     margin: 10px 0px;
     font-weight: bold;
 }
+
 #selector_pane input[type="radio"]:checked+label {
     /* background-color: #eee; */
     /* border-color: #eee; */
@@ -100,6 +119,7 @@ input[type="radio"] {
     border-color: #eeff00;
     color: #050e18;
 }
+
 button {
     background-color: #eeff00;
     border: #eeff00 solid 1px;
@@ -114,10 +134,31 @@ button {
 #last_month_chart {
     display: none;
 }
+
 #year_charts {
     display: none;
 }
 
 text {
     color: #eee;
+}
+
+#loading_msg {
+    width: 10vh;
+    height: 10vh;
+    border-radius: 50%;
+    border: 30px solid #c1d0e6;
+    border-top-color: #1e2a38;
+    animation: spinner 1.5s linear infinite;
+    margin: 0;
+    position: fixed;
+    top: 40%;
+    left: calc(50% - 5vh);
+    /* transform: (0,0%); */
+}
+
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
 }

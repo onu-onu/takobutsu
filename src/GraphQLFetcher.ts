@@ -82,7 +82,7 @@ export class GraphQLFetcher {
                     "toDatetime": endData
                 };
                 let result = await this.fetchWrapper(query, variables, token);
-                resolve(result.data.account.properties[0].electricitySupplyPoints[0].halfHourlyReadings)
+                resolve(result.data.account.properties[0].electricitySupplyPoints[0].halfHourlyReadings);
             } catch (error) {
                 reject(error);
             }
