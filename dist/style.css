@@ -129,6 +129,7 @@ button {
     height: 30px;
     margin: 10px 0px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 #last_month_chart {
@@ -147,7 +148,7 @@ text {
     width: 10vh;
     height: 10vh;
     border-radius: 50%;
-    border: 30px solid #c1d0e6;
+    border: 15px solid #c1d0e6;
     border-top-color: #1e2a38;
     animation: spinner 1.5s linear infinite;
     margin: 0;

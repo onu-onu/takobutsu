@@ -71,7 +71,8 @@ export class Chart {
             .attr('transform', `translate(0, ${height})`)
             .call(d3.axisBottom(this.xScale));
         xAxis.selectAll('text')
-            .attr('transform', `translate(${-this.xScale.bandwidth() / 2}, 5)rotate(-60)`)
+            .attr('transform', `translate(-10, 5)rotate(-60)`)
+            // .attr('transform', `rotate(-60)`)
             .attr('text-anchor', 'end');
 
         svg.selectAll('text').style('color', '#eee');
