@@ -54,8 +54,8 @@ h1 {
     left: 50%;
     transform: translate(-50%, 0);
     /* text-align: center; */
-    font-size: 80%;
-    margin: 10px;
+    font-size: 12px;
+    margin: 10px, 0;
 }
 
 a {
@@ -168,4 +168,9 @@ text {
     to {
         transform: rotate(360deg);
     }
+}
+
+#stmt {
+    margin: 50px 10px;
+    font-size: 12px;
 }

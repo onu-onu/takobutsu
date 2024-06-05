@@ -45,15 +45,17 @@ export class DataSet {
             let key: string = crntDayjs.format('YYYY-MM');
             if (Object.keys(this._dataSet).includes(key)) {
                 let monthlyTotal = this._dataSet[key].sum();
-                costList.push({
-                    dateStr: monthlyTotal.dateStr,
-                    value: monthlyTotal.cost
-                });
-                
-                energyList.push({
-                    dateStr: monthlyTotal.dateStr, 
-                    value: monthlyTotal.energy
-                });
+                if (monthlyTotal.cost !== 0 && monthlyTotal.energy !== 0) {
+                    costList.push({
+                        dateStr: key,
+                        value: monthlyTotal.cost
+                    });
+
+                    energyList.push({
+                        dateStr: key,
+                        value: monthlyTotal.energy
+                    });
+                }
             }
             crntDayjs = crntDayjs.add(1, 'M');
         }

@@ -38,7 +38,6 @@ export class Chart {
 
         if (data.length == 0) {
             svg.append('text')
-                .attr('class', 'no_data')
                 .attr('x', width / 2)
                 .attr('y', height / 2)
                 .attr('text-anchor', 'middle')
@@ -71,7 +70,7 @@ export class Chart {
             .attr('ry', 5);
 
         svg.append('g')
-            .call(d3.axisLeft(yScale).ticks(10));
+            .call(d3.axisLeft(yScale).ticks(5));
         svg.append('text')
             .attr('x', 0)
             .attr('y', -10)

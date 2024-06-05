@@ -61,7 +61,6 @@ export class Data {
             sumCost += d.cost;
         });
         return {
-            dateStr: dayjs(this._data[0].dateStr).format('YYYY-MM'),
             cost: sumCost,
             energy: sumEnergy
         };
