@@ -14,8 +14,7 @@ export class Chart {
     private height: number;
     private xScale: any = null;
 
-    constructor(idName: string, _width: number, _height: number) {
-        let margin = { top: 20, right: 50, bottom: 80, left: 50 };
+    constructor(idName: string, _width: number, _height: number, margin: {top:number, right:number, bottom:number, left:number}) {
         this.width = _width - margin.left - margin.right;
         this.height = _height - margin.top - margin.bottom;
 
@@ -28,12 +27,27 @@ export class Chart {
             .attr('transform', `translate(${margin.left},${margin.top})`);
     }
 
+    public clear() {
+        this.svg.selectAll('*').remove()
+    }
 
     public drawBar(data: any, yaxisTitle: string, color: string) {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
-        console.log(data)
+
+        if (data.length == 0) {
+            svg.append('text')
+                .attr('class', 'no_data')
+                .attr('x', width / 2)
+                .attr('y', height / 2)
+                .attr('text-anchor', 'middle')
+                .attr('text-align', 'center')
+                .attr('font-size', `24px`)
+                .attr('fill', '#eee')
+                .text('no data');
+            return;
+        }
 
         this.xScale = d3.scaleBand()
             .range([0, width])
@@ -64,7 +78,7 @@ export class Chart {
             .attr('text-anchor', 'top')
             .attr('text-align', 'center')
             .attr('font-size', `12px`)
-            .style('color', '#eee')
+            .attr('fill', '#eee')
             .text(yaxisTitle);
 
         let xAxis = svg.append('g')
@@ -72,10 +86,8 @@ export class Chart {
             .call(d3.axisBottom(this.xScale));
         xAxis.selectAll('text')
             .attr('transform', `translate(-10, 5)rotate(-60)`)
-            // .attr('transform', `rotate(-60)`)
-            .attr('text-anchor', 'end');
-
-        svg.selectAll('text').style('color', '#eee');
+            .attr('text-anchor', 'end')
+            .attr('fill', '#eee');
     }
 
 
@@ -83,6 +95,10 @@ export class Chart {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
+        
+        if (data.length == 0) {
+            return;
+        }
 
         // Add Y axis
         let yScale = d3.scaleLinear()
@@ -97,7 +113,7 @@ export class Chart {
             .attr('text-anchor', 'end')
             .attr('text-align', 'center')
             .attr('font-size', `12px`)
-            .style('color', '#eee')
+            .attr('fill', '#eee')
             .text(yaxisTitle);
 
 
@@ -119,8 +135,6 @@ export class Chart {
             .attr("cy", (d: any) => yScale(d.value))
             .attr("r", 5)
             .style("fill", color);
-
-        svg.selectAll('text').style('color', '#eee');
     }
 
     public drawCalHeatmap(data: any, color0: string, color1: string) {
@@ -128,7 +142,6 @@ export class Chart {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
-
         let weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
         let x = d3.scaleBand()
@@ -173,8 +186,8 @@ export class Chart {
             .attr("width", x.bandwidth())
             .attr("height", y.bandwidth())
             .style("fill", (d: any) => myColor(d.value))
-            .attr('rx', 5)
-            .attr('ry', 5);
+            .attr('rx', 2)
+            .attr('ry', 2);
     }
 
     private prepareDataForHeatmap(data: any[]): any[] {

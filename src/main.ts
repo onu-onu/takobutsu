@@ -51,28 +51,6 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
     });
 }
 
-function draw(dataSet: DataSet, date: string, type: string, width: number, height: number) {
-    const baseColor = '#1e2a38';
-    const lightColor = '#c1d0e6';
-    const accentColor = '#eeff00';
-    loadingStart();
-    if (type == 'M') {
-        const monthlyChart = new Chart('#month_chart', width, height);
-        let data = dataSet.rangeDailyData(date, date);
-        console.log(data)
-        monthlyChart.drawBar(data.energy, 'kWh', lightColor);
-        monthlyChart.drawLineSub(data.cost, 'cost(yen)', accentColor);
-    } else if (type == 'Y') {
-        const yearlyChart = new Chart('#year_charts', width, height);
-        let data = dataSet.rangeMonthlyData(date, date);
-        yearlyChart.drawBar(data.energy, 'kWh', lightColor);
-        yearlyChart.drawLineSub(data.cost, 'cost(yen)', accentColor);
-    }
-    loadingEnd();
-    const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
-    chartPane.style.display = 'block';
-}
-
 function initController() {
     let radioBtns = document.querySelectorAll<HTMLInputElement>(`input[type='radio'][name='chart_select']`);
 
@@ -149,6 +127,7 @@ window.onload = () => {
     const body: HTMLElement = <HTMLElement>document.querySelector('body');
     const loginPane: HTMLElement = <HTMLElement>document.querySelector('#login_pane');
 
+    const baseColor = '#1e2a38';
     const lightColor = '#c1d0e6';
     const accentColor = '#eeff00';
 
@@ -162,37 +141,71 @@ window.onload = () => {
     let chartW = body.clientWidth < maxChartW ? body.clientWidth : maxChartW;
     let chartH = body.clientHeight - 300 < chartW ? body.clientHeight - 300 : chartW;
 
-    const monthlyChart = new Chart('#month_chart', chartW, chartH);
-    const yearlyChart = new Chart('#year_charts', chartW, chartH);
+    const monthlyChart = new Chart('#month_chart', chartW, chartH, { top: 20, right: 50, bottom: 80, left: 50 });
+    const yearlyChart = new Chart('#year_chart', chartW, chartH /2, { top: 20, right: 50, bottom: 60, left: 50 });
+    const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
     const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
     
-
-
     submitBtn.addEventListener('click', async () => {
         loginPane.style.display = 'none';
         loadingStart();
+        let today = dayjs().format('YYYY-MM');
         // dataSet = await getData(dataSet, String(emailTexarea.value), String(passTexarea.value), String(userIdTexarea.value), today, today);
         dataSet = await demoDataReader(dataSet);
         
-        let today = dayjs().format('YYYY-MM');
         let dailyData = dataSet.rangeDailyData(today, today);
         monthlyChart.drawBar(dailyData.energy, 'kWh', lightColor);
-        monthlyChart.drawLineSub(dailyData.cost, 'cost(yen)', accentColor);
+        monthlyChart.drawLineSub(dailyData.cost, '円', accentColor);
 
         let thisYear = dayjs().format('YYYY');
         let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
         yearlyChart.drawBar(monthlyData.energy, 'kWh', lightColor);
-        yearlyChart.drawLineSub(monthlyData.cost, 'cost(yen)', accentColor);
+        yearlyChart.drawLineSub(monthlyData.cost, '円', accentColor);
 
+        let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
+        yearlyHeatmap.clear();
+        yearlyHeatmap.drawCalHeatmap(dailyYearData.energy, lightColor, baseColor);
         chartPane.style.display = 'block';
         loadingEnd();
     });
 
     let yearSlcter: HTMLSelectElement = <HTMLSelectElement>document.querySelector('#year_slct');
-    yearSlcter.addEventListener('change', async () => {
-        console.log(yearSlcter.value);
-    });
     let monthSlcter: HTMLSelectElement = <HTMLSelectElement>document.querySelector('#month_slct');
+    yearSlcter.addEventListener('change', async () => {
+        let today = `${yearSlcter.value}-${monthSlcter.value}`;
+        let dailyData = dataSet.rangeDailyData(today, today);
+        monthlyChart.clear();
+        monthlyChart.drawBar(dailyData.energy, 'kWh', lightColor);
+        monthlyChart.drawLineSub(dailyData.cost, '円', accentColor);
+
+        let thisYear = yearSlcter.value;
+        let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
+        yearlyChart.clear();
+        yearlyChart.drawBar(monthlyData.energy, 'kWh', lightColor);
+        yearlyChart.drawLineSub(monthlyData.cost, '円', accentColor);
+        
+        let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
+        yearlyHeatmap.clear();
+        yearlyHeatmap.drawCalHeatmap(dailyYearData.energy, lightColor, baseColor);
+    });
+
+    monthSlcter.addEventListener('change', async () => {
+        let today = `${yearSlcter.value}-${monthSlcter.value}`;
+        let dailyData = dataSet.rangeDailyData(today, today);
+        monthlyChart.clear();
+        monthlyChart.drawBar(dailyData.energy, 'kWh', lightColor);
+        monthlyChart.drawLineSub(dailyData.cost, '円', accentColor);
+
+        let thisYear = yearSlcter.value;
+        let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
+        yearlyChart.clear();
+        yearlyChart.drawBar(monthlyData.energy, 'kWh', lightColor);
+        yearlyChart.drawLineSub(monthlyData.cost, '円', accentColor);
+        
+        let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
+        yearlyHeatmap.clear();
+        yearlyHeatmap.drawCalHeatmap(dailyYearData.energy, lightColor, baseColor);
+    });
 
 
 

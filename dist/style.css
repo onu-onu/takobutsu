@@ -79,6 +79,12 @@ input[type="password"] {
     text-align: center;
 }
 
+input[type="email"]:active,
+input[type="text"]:active,
+input[type="password"]:active {
+    background: #1e2a38;
+}
+
 ::placeholder {
     color: #ccc;
     font-weight: bold;

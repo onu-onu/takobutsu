@@ -23,7 +23,6 @@ export class DataSet {
         let energyList: any[] = [];
         while (crntDayjs <= endDayjs) {
             let key: string = crntDayjs.format('YYYY-MM');
-            console.log(crntDayjs.format('YYYY-MM-DD'))
             if (Object.keys(this._dataSet).includes(key)) {
                 costList = costList.concat(this._dataSet[key].cost);
                 energyList = energyList.concat(this._dataSet[key].energy);
@@ -44,7 +43,6 @@ export class DataSet {
         let energyList: any = [];
         while (crntDayjs <= endDayjs) {
             let key: string = crntDayjs.format('YYYY-MM');
-            // console.log(crntDayjs.format('YYYY-MM-DD'), endDayjs.format('YYYY-MM-DD'))
             if (Object.keys(this._dataSet).includes(key)) {
                 let monthlyTotal = this._dataSet[key].sum();
                 costList.push({
