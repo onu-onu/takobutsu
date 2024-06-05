@@ -69,13 +69,12 @@ export class GraphQLFetcher {
                                     startAt
                                     value
                                     costEstimate
-                                    consumptionStep
-                                    consumptionRateBand
                                 }
                             }
                         }
                     }
                 }`
+                // クエリで(startAtと同列) consumptionStep,consumptionRateBand を指定可能
                 const variables = {
                     "accountNumber": accountNumber,
                     "fromDatetime": startDate,
