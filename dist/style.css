@@ -62,9 +62,9 @@ h1 .butsu {
     bottom: 10px;
     left: 50%;
     transform: translate(-50%, 0);
-    /* text-align: center; */
     font-size: 12px;
     margin: 10px, 0;
+    width: auto;
 }
 
 a {
