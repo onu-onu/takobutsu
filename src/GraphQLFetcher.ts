@@ -69,20 +69,19 @@ export class GraphQLFetcher {
                                     startAt
                                     value
                                     costEstimate
-                                    consumptionStep
-                                    consumptionRateBand
                                 }
                             }
                         }
                     }
                 }`
+                // クエリで(startAtと同列) consumptionStep,consumptionRateBand を指定可能
                 const variables = {
                     "accountNumber": accountNumber,
                     "fromDatetime": startDate,
                     "toDatetime": endData
                 };
                 let result = await this.fetchWrapper(query, variables, token);
-                resolve(result.data.account.properties[0].electricitySupplyPoints[0].halfHourlyReadings)
+                resolve(result.data.account.properties[0].electricitySupplyPoints[0].halfHourlyReadings);
             } catch (error) {
                 reject(error);
             }
