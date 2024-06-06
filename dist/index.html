@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="./main.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <title>Takobutsu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Reddit+Mono:wght@200..900&family=Roboto+Serif:ital,opsz,wght@0,8..144,100..900;1,8..144,100..900&family=Roboto+Slab:wght@100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Zen+Maru+Gothic&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <title>takobutsu</title>
 </head>
 
 <body>
-    <h1>Takobutsu</h1>
+    <h1><span class="tako">tako</span><span class="space"></span><span class="butsu">butsu</span></h1>
     <div id="login_pane" class="pane">
         <div>
             <input type="email" name="email" id="email" placeholder="メールアドレス">
@@ -44,7 +49,7 @@
             <input type="radio" name="chart_select" id="year_charts_slct">
             <label for="year_charts_slct">年間</label>
         </div>
-        
+
         <div id="date_select_pane">
             <select name="" id="year_slct">
 
@@ -80,7 +85,32 @@
     </div>
 
     <div id="info">
-        <div>&copy;2024 onu. | <a href="https://octopusenergy.co.jp/" target="_blank">Octopus energy</a></div>
+        <div>
+            <span>&copy;2024 onu.</span>
+            <span class="space"></span>
+            <span>|</span>
+            <span class="space"></span>
+            <a href="https://github.com/tomoya-onuki/takobutsu">
+                <span>GitHub</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" height="15px" width="15px" fill="#eee"
+                    transform="translate(1,4)">
+                    <path
+                        d="M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h264v72H216v528h528v-264h72v264q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm171-192-51-51 357-357H576v-72h240v240h-72v-117L387-336Z" />
+                </svg>
+            </a>
+            <span class="space"></span>
+            <span>|</span>
+            <span class="space"></span>
+            <a href="https://octopusenergy.co.jp/" target="_blank">
+                <span>TGオクトパスエナジー</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" height="15px" width="15px" fill="#eee"
+                    transform="translate(1,4)">
+                    <path
+                        d="M216-144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h264v72H216v528h528v-264h72v264q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm171-192-51-51 357-357H576v-72h240v240h-72v-117L387-336Z" />
+                </svg>
+            </a>
+
+        </div>
         <div>※ 非公式アプリです / This is an unofficial application</div>
     </div>
 </body>

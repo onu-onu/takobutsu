@@ -6,6 +6,7 @@ body {
     position: relative;
     width: 100vw;
     text-align: center;
+    font-family: "Noto Sans JP", sans-serif;
 }
 
 label {
@@ -46,6 +47,14 @@ h1 {
     /* text-decoration-line: underline overline; */
     margin: 0;
     padding: 20px 0 0 0;
+    font-family: "Nunito", sans-serif;
+}
+h1 .tako{
+    font-weight: 900;
+}
+h1 .butsu {
+    font-weight: 100;
+    font-size: 80%;
 }
 
 #info {
@@ -61,9 +70,17 @@ h1 {
 a {
     color: #eee;
 }
+a:hover {
+    opacity: 0.5;
+}
 
 .pane {
     margin: 20px 0;
+}
+
+.space {
+    display: inline-block;
+    width: 5px;
 }
 
 input[type="email"],
@@ -173,4 +190,21 @@ text {
 #stmt {
     margin: 50px 10px;
     font-size: 12px;
+}
+
+
+.sans {
+    font-family: "Nunito", sans-serif;
+}
+.serif {
+    font-family: "Roboto Serif", serif;
+}
+.bold {
+    font-weight: 900;
+}
+.norlam {
+    font-weight: 400;
+}
+.light {
+    font-weight: 100;
 }
