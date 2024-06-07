@@ -137,6 +137,10 @@ export class Chart {
     }
 
     public drawCalHeatmap(data: any, color0: string, color1: string) {
+        if (data.length == 0) {
+            return;
+        }
+        
         data = this.prepareDataForHeatmap(data);
         const svg = this.svg;
         const width = this.width;
