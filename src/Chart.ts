@@ -14,7 +14,7 @@ export class Chart {
     private height: number;
     private xScale: any = null;
 
-    constructor(idName: string, _width: number, _height: number, margin: {top:number, right:number, bottom:number, left:number}) {
+    constructor(idName: string, _width: number, _height: number, margin: { top: number, right: number, bottom: number, left: number }) {
         this.width = _width - margin.left - margin.right;
         this.height = _height - margin.top - margin.bottom;
 
@@ -48,15 +48,18 @@ export class Chart {
             return;
         }
 
+        let padding: number = data.length >= 15 ? 0.3 : 0.2;
+        console.log(padding)
         this.xScale = d3.scaleBand()
             .range([0, width])
             .domain(data.map((d: any) => d.dateStr))
-            .padding(0.2);
+            .padding(padding);
 
         let yScale = d3.scaleLinear()
             .domain([0, Number(d3.max(data, (d: any) => +Number(d.value)))])
             .range([height, 0]);
 
+        let r = data.length < 5 ? 5 : this.xScale.bandwidth() * 0.2;
         svg.selectAll('mybar')
             .data(data)
             .join('rect')
@@ -66,8 +69,8 @@ export class Chart {
             .attr('height', (d: any) => height - yScale(d.value))
             .attr('fill', color)
             .attr('stroke', color)
-            .attr('rx', 5)
-            .attr('ry', 5);
+            .attr('rx', r)
+            .attr('ry', r);
 
         svg.append('g')
             .call(d3.axisLeft(yScale).ticks(5));
@@ -87,6 +90,14 @@ export class Chart {
             .attr('transform', `translate(-10, 5)rotate(-60)`)
             .attr('text-anchor', 'end')
             .attr('fill', '#eee');
+        // 2week以上の表示はx軸の目盛文字は一個飛ばし
+        if (data.length >= 15) {
+            xAxis.selectAll('text')._groups[0].forEach((node: any, i: number) => {
+                if (i % 2 == 1) {
+                    node.remove();
+                }
+            });
+        }
     }
 
 
@@ -94,7 +105,7 @@ export class Chart {
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
-        
+
         if (data.length == 0) {
             return;
         }
@@ -140,7 +151,7 @@ export class Chart {
         if (data.length == 0) {
             return;
         }
-        
+
         data = this.prepareDataForHeatmap(data);
         const svg = this.svg;
         const width = this.width;
