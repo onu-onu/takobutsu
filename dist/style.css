@@ -220,3 +220,15 @@ text {
 .light {
     font-weight: 100;
 }
+
+#tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: auto;
+    height: auto;
+    padding: 5px 10px;
+    background-color: rgba(30, 42, 56, 0.8);
+    border-radius: 6px;
+    font-size: 80%;
+}

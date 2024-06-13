@@ -19,50 +19,37 @@ export class DataSet {
         let crntDayjs = dayjs(startYYYYMM);
         let endDayjs = dayjs(endYYYYMM);
 
-        let costList: any[] = [];
-        let energyList: any[] = [];
+        let values: any[] = [];
         while (crntDayjs <= endDayjs) {
             let key: string = crntDayjs.format('YYYY-MM');
             if (Object.keys(this._dataSet).includes(key)) {
-                costList = costList.concat(this._dataSet[key].cost);
-                energyList = energyList.concat(this._dataSet[key].energy);
+                values = values.concat(this._dataSet[key].value);
             }
             crntDayjs = crntDayjs.add(1, 'M');
         }
-        return {
-            energy: energyList,
-            cost: costList
-        };
+        return values;
     }
 
     public rangeMonthlyData(startYYYY: string, endYYYY: string) {
         let crntDayjs = dayjs(`${startYYYY}-01`);
         let endDayjs = dayjs(`${endYYYY}-12`);
-        // let costList: {dateStr:string, value:number}[] = [];
-        let costList: any = [];
-        let energyList: any = [];
+        
+        let values: any = [];
         while (crntDayjs <= endDayjs) {
             let key: string = crntDayjs.format('YYYY-MM');
             if (Object.keys(this._dataSet).includes(key)) {
                 let monthlyTotal = this._dataSet[key].sum();
                 if (monthlyTotal.cost !== 0 && monthlyTotal.energy !== 0) {
-                    costList.push({
+                    values.push({
                         dateStr: key,
-                        value: monthlyTotal.cost
-                    });
-
-                    energyList.push({
-                        dateStr: key,
-                        value: monthlyTotal.energy
+                        cost: monthlyTotal.cost,
+                        energy: monthlyTotal.energy
                     });
                 }
             }
             crntDayjs = crntDayjs.add(1, 'M');
         }
-        return {
-            energy: energyList,
-            cost: costList
-        };
+        return values;
     }
 
 

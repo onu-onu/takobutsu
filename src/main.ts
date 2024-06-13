@@ -128,10 +128,6 @@ window.onload = () => {
     const body: HTMLElement = <HTMLElement>document.querySelector('body');
     const loginPane: HTMLElement = <HTMLElement>document.querySelector('#login_pane');
 
-    const baseColor = '#1e2a38';
-    const lightColor = '#c1d0e6';
-    const accentColor = '#eeff00';
-
     let dataSet: DataSet = new DataSet();
 
     initController();
@@ -151,27 +147,24 @@ window.onload = () => {
 
         loadingStart();
         let thisYear = dayjs().format('YYYY');
-        dataSet = await getData(dataSet,
-            String(emailTexarea.value),
-            String(passTexarea.value),
-            String(userIdTexarea.value),
-            `${thisYear}-01`,
-            `${thisYear}-12`);
-        // dataSet = await demoDataReader(dataSet);
+        // dataSet = await getData(dataSet,
+        //     String(emailTexarea.value),
+        //     String(passTexarea.value),
+        //     String(userIdTexarea.value),
+        //     `${thisYear}-01`,
+        //     `${thisYear}-12`);
+        dataSet = await demoDataReader(dataSet);
 
         let today = dayjs().format('YYYY-MM');
         let dailyData = dataSet.rangeDailyData(today, today);
-        monthlyChart.drawBar(dailyData.energy, 'kWh', lightColor);
-        monthlyChart.drawLineSub(dailyData.cost, '円', accentColor);
+        monthlyChart.drawBarAndLine(dailyData);
 
         let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        yearlyChart.drawBar(monthlyData.energy, 'kWh', lightColor);
-        yearlyChart.drawLineSub(monthlyData.cost, '円', accentColor);
+        yearlyChart.drawBarAndLine(monthlyData);
 
         let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
         yearlyHeatmap.clear();
-        yearlyHeatmap.drawCalHeatmap(dailyYearData.energy, lightColor, baseColor);
-
+        yearlyHeatmap.drawCalHeatmap(dailyYearData);
 
         const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
         chartPane.style.display = 'block';
@@ -183,47 +176,44 @@ window.onload = () => {
     yearSlcter.addEventListener('change', async () => {
         loadingStart();
         let thisYear = yearSlcter.value;
-        dataSet = await getData(dataSet,
-            String(emailTexarea.value),
-            String(passTexarea.value),
-            String(userIdTexarea.value),
-            `${thisYear}-01`,
-            `${thisYear}-12`);
+        // dataSet = await getData(dataSet,
+        //     String(emailTexarea.value),
+        //     String(passTexarea.value),
+        //     String(userIdTexarea.value),
+        //     `${thisYear}-01`,
+        //     `${thisYear}-12`);
 
         let today = `${yearSlcter.value}-${monthSlcter.value}`;
         let dailyData = dataSet.rangeDailyData(today, today);
         monthlyChart.clear();
-        monthlyChart.drawBar(dailyData.energy, 'kWh', lightColor);
-        monthlyChart.drawLineSub(dailyData.cost, '円', accentColor);
+        monthlyChart.drawBarAndLine(dailyData);
 
         let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
         yearlyChart.clear();
-        yearlyChart.drawBar(monthlyData.energy, 'kWh', lightColor);
-        yearlyChart.drawLineSub(monthlyData.cost, '円', accentColor);
+        yearlyChart.drawBarAndLine(monthlyData);
 
-        let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
+        let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
         yearlyHeatmap.clear();
-        yearlyHeatmap.drawCalHeatmap(dailyYearData.energy, lightColor, baseColor);
+        yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
 
     monthSlcter.addEventListener('change', async () => {
         loadingStart();
         let today = `${yearSlcter.value}-${monthSlcter.value}`;
+        
         let dailyData = dataSet.rangeDailyData(today, today);
         monthlyChart.clear();
-        monthlyChart.drawBar(dailyData.energy, 'kWh', lightColor);
-        monthlyChart.drawLineSub(dailyData.cost, '円', accentColor);
+        monthlyChart.drawBarAndLine(dailyData);
 
         let thisYear = yearSlcter.value;
         let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
         yearlyChart.clear();
-        yearlyChart.drawBar(monthlyData.energy, 'kWh', lightColor);
-        yearlyChart.drawLineSub(monthlyData.cost, '円', accentColor);
+        yearlyChart.drawBarAndLine(monthlyData)
 
         let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
         yearlyHeatmap.clear();
-        yearlyHeatmap.drawCalHeatmap(dailyYearData.energy, lightColor, baseColor);
+        yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
 }

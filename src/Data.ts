@@ -53,6 +53,16 @@ export class Data {
         });
     }
 
+    public get value() {
+        return this._data.map(d => {
+            return {
+                dateStr: d.dateStr,
+                cost: d.cost,
+                energy: d.energy
+            };
+        });
+    }
+
     public sum() {
         let sumEnergy = 0;
         let sumCost = 0;
