@@ -147,13 +147,13 @@ window.onload = () => {
 
         loadingStart();
         let thisYear = dayjs().format('YYYY');
-        // dataSet = await getData(dataSet,
-        //     String(emailTexarea.value),
-        //     String(passTexarea.value),
-        //     String(userIdTexarea.value),
-        //     `${thisYear}-01`,
-        //     `${thisYear}-12`);
-        dataSet = await demoDataReader(dataSet);
+        dataSet = await getData(dataSet,
+            String(emailTexarea.value),
+            String(passTexarea.value),
+            String(userIdTexarea.value),
+            `${thisYear}-01`,
+            `${thisYear}-12`);
+        // dataSet = await demoDataReader(dataSet);
 
         let today = dayjs().format('YYYY-MM');
         let dailyData = dataSet.rangeDailyData(today, today);
@@ -176,12 +176,12 @@ window.onload = () => {
     yearSlcter.addEventListener('change', async () => {
         loadingStart();
         let thisYear = yearSlcter.value;
-        // dataSet = await getData(dataSet,
-        //     String(emailTexarea.value),
-        //     String(passTexarea.value),
-        //     String(userIdTexarea.value),
-        //     `${thisYear}-01`,
-        //     `${thisYear}-12`);
+        dataSet = await getData(dataSet,
+            String(emailTexarea.value),
+            String(passTexarea.value),
+            String(userIdTexarea.value),
+            `${thisYear}-01`,
+            `${thisYear}-12`);
 
         let today = `${yearSlcter.value}-${monthSlcter.value}`;
         let dailyData = dataSet.rangeDailyData(today, today);
