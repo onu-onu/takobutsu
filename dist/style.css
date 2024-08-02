@@ -67,6 +67,17 @@ h1 .butsu {
     width: auto;
 }
 
+#release-note {
+    text-align: left;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    margin: 10px, 0;
+    width: auto;
+    font-weight: 300;
+    line-height: 2em;
+}
+
 a {
     color: #eee;
 }
