@@ -15,6 +15,42 @@ export class DataSet {
         return this._dataSet[YYYYMM].energy;
     }
 
+    public get maxEnergy(): number {
+        /*
+         *  _dataSet = {
+         *      '202401': {
+         *          energy: [{
+         *              dateStr: '2024-01-01',
+         *              value: 1,
+         *          },
+         *          ...
+         *          {
+         *              dateStr: '2024-01-31',
+         *              value: 2
+         *          }]
+         *      }, 
+         *      '2024-02': {
+         *          ...
+         *      }
+         *  }
+         */
+        let allEnergyValues = Object.values(this._dataSet).map(monthlyData => {
+            return monthlyData.energy.map(dailyEnergy=> {
+                return dailyEnergy.value
+            });
+        }).flat();
+        return Math.max(...allEnergyValues);
+    }
+
+    public get maxCost(): number {
+        let allCostValues = Object.values(this._dataSet).map(monthlyData => {
+            return monthlyData.cost.map(dailyCost => {
+                return dailyCost.value
+            });
+        }).flat();
+        return Math.max(...allCostValues);
+    }
+
     public rangeDailyData(startYYYYMM: string, endYYYYMM: string) {
         let crntDayjs = dayjs(startYYYYMM);
         let endDayjs = dayjs(endYYYYMM);
