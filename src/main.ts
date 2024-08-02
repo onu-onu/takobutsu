@@ -142,29 +142,53 @@ window.onload = () => {
     const yearlyChart = new Chart('#year_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 60, left: 50 });
     const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
 
+    async function draw(y: string, m: string) {
+        dataSet = await getData(dataSet,
+            String(emailTexarea.value),
+            String(passTexarea.value),
+            String(userIdTexarea.value),
+            `${y}-01`,
+            `${y}-12`);
+    
+        let today = `${y}-${m}`;
+        let dailyData = dataSet.rangeDailyData(today, today);
+        monthlyChart.clear();
+        monthlyChart.drawBarAndLine(dailyData);
+    
+        let monthlyData = dataSet.rangeMonthlyData(y, y);
+        yearlyChart.clear();
+        yearlyChart.drawBarAndLine(monthlyData);
+    
+        let dailyYearData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
+        yearlyHeatmap.clear();
+        yearlyHeatmap.drawCalHeatmap(dailyYearData);
+    }
+
     submitBtn.addEventListener('click', async () => {
         loginPane.style.display = 'none';
 
         loadingStart();
         let thisYear = dayjs().format('YYYY');
-        dataSet = await getData(dataSet,
-            String(emailTexarea.value),
-            String(passTexarea.value),
-            String(userIdTexarea.value),
-            `${thisYear}-01`,
-            `${thisYear}-12`);
-        // dataSet = await demoDataReader(dataSet);
+        let thisMonth = dayjs().format('MM');
+        await draw(thisYear, thisMonth);
+        // dataSet = await getData(dataSet,
+        //     String(emailTexarea.value),
+        //     String(passTexarea.value),
+        //     String(userIdTexarea.value),
+        //     `${thisYear}-01`,
+        //     `${thisYear}-12`);
+        // // dataSet = await demoDataReader(dataSet);
 
-        let today = dayjs().format('YYYY-MM');
-        let dailyData = dataSet.rangeDailyData(today, today);
-        monthlyChart.drawBarAndLine(dailyData);
+        // let today = dayjs().format('YYYY-MM');
+        // let dailyData = dataSet.rangeDailyData(today, today);
+        // monthlyChart.drawBarAndLine(dailyData);
 
-        let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        yearlyChart.drawBarAndLine(monthlyData);
+        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
+        // yearlyChart.drawBarAndLine(monthlyData);
 
-        let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
-        yearlyHeatmap.clear();
-        yearlyHeatmap.drawCalHeatmap(dailyYearData);
+        // let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
+        // yearlyHeatmap.clear();
+        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
 
         const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
         chartPane.style.display = 'block';
@@ -176,48 +200,114 @@ window.onload = () => {
     yearSlcter.addEventListener('change', async () => {
         loadingStart();
         let thisYear = yearSlcter.value;
-        dataSet = await getData(dataSet,
-            String(emailTexarea.value),
-            String(passTexarea.value),
-            String(userIdTexarea.value),
-            `${thisYear}-01`,
-            `${thisYear}-12`);
+        let thisMonth = monthSlcter.value;
+        await draw(thisYear, thisMonth);
+        // dataSet = await getData(dataSet,
+        //     String(emailTexarea.value),
+        //     String(passTexarea.value),
+        //     String(userIdTexarea.value),
+        //     `${thisYear}-01`,
+        //     `${thisYear}-12`);
 
-        let today = `${yearSlcter.value}-${monthSlcter.value}`;
-        let dailyData = dataSet.rangeDailyData(today, today);
-        monthlyChart.clear();
-        monthlyChart.drawBarAndLine(dailyData);
+        // let today = `${yearSlcter.value}-${monthSlcter.value}`;
+        // let dailyData = dataSet.rangeDailyData(today, today);
+        // monthlyChart.clear();
+        // monthlyChart.drawBarAndLine(dailyData);
 
-        let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        yearlyChart.clear();
-        yearlyChart.drawBarAndLine(monthlyData);
+        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
+        // yearlyChart.clear();
+        // yearlyChart.drawBarAndLine(monthlyData);
 
-        let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
-        yearlyHeatmap.clear();
-        yearlyHeatmap.drawCalHeatmap(dailyYearData);
+        // let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
+        // yearlyHeatmap.clear();
+        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
 
     monthSlcter.addEventListener('change', async () => {
         loadingStart();
-        let today = `${yearSlcter.value}-${monthSlcter.value}`;
-        
-        let dailyData = dataSet.rangeDailyData(today, today);
-        monthlyChart.clear();
-        monthlyChart.drawBarAndLine(dailyData);
-
         let thisYear = yearSlcter.value;
-        let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        yearlyChart.clear();
-        yearlyChart.drawBarAndLine(monthlyData)
+        let thisMonth = monthSlcter.value;
+        await draw(thisYear, thisMonth);
+        // let today = `${yearSlcter.value}-${monthSlcter.value}`;
+        
+        
+        // let dailyData = dataSet.rangeDailyData(today, today);
+        // monthlyChart.clear();
+        // monthlyChart.drawBarAndLine(dailyData);
 
-        let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
-        yearlyHeatmap.clear();
-        yearlyHeatmap.drawCalHeatmap(dailyYearData);
+        // let thisYear = yearSlcter.value;
+        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
+        // yearlyChart.clear();
+        // yearlyChart.drawBarAndLine(monthlyData)
+
+        // let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
+        // yearlyHeatmap.clear();
+        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
-}
 
+    const prevBtn = <HTMLButtonElement>document.querySelector('#prev');
+    prevBtn.addEventListener('click', async () => {
+        let monthChartSlct = <HTMLInputElement>document.querySelector('#month_chart_slct');
+        let yearChartSlct = <HTMLInputElement>document.querySelector('#year_charts_slct');
+
+        if (monthChartSlct.checked) {
+            let thisMonth = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
+            let prevMonth = thisMonth.add(-1, 'month');
+            let m = String(prevMonth.month() + 1);
+            let y = String(prevMonth.year());
+            yearSlcter.value = y;
+            monthSlcter.value = m;
+
+            loadingStart();
+            await draw(y, m);
+            loadingEnd();
+        } else if(yearChartSlct) {
+            let thisYear = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
+            let prevYear = thisYear.add(-1, 'year');
+            let m = '1';
+            let y = String(prevYear.year());
+            yearSlcter.value = y;
+            monthSlcter.value = m;
+
+            loadingStart();
+            await draw(y, m);
+            loadingEnd();
+        }
+        
+    });
+
+    const nextBtn = <HTMLButtonElement>document.querySelector('#next');
+    nextBtn.addEventListener('click', async () => {
+        let monthChartSlct = <HTMLInputElement>document.querySelector('#month_chart_slct');
+        let yearChartSlct = <HTMLInputElement>document.querySelector('#year_charts_slct');
+
+        if (monthChartSlct.checked) {
+            let thisMonth = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
+            let prevMonth = thisMonth.add(1, 'month');
+            let m = String(prevMonth.month() + 1);
+            let y = String(prevMonth.year());
+            yearSlcter.value = y;
+            monthSlcter.value = m;
+
+            loadingStart();
+            await draw(y, m);
+            loadingEnd();
+        } else if(yearChartSlct) {
+            let thisYear = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
+            let prevYear = thisYear.add(1, 'year');
+            let m = '1';
+            let y = String(prevYear.year());
+            yearSlcter.value = y;
+            monthSlcter.value = m;
+
+            loadingStart();
+            await draw(y, m);
+            loadingEnd();
+        }
+    });
+}
 
 function demoDataReader(dataSet: DataSet): Promise<any> {
     return new Promise(async (resolve, reject) => {

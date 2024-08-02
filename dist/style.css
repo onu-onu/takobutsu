@@ -232,3 +232,14 @@ text {
     border-radius: 6px;
     font-size: 80%;
 }
+
+#prev, #next {
+    background: #1e2a38;
+    border: #eee solid 1px;
+    border-radius: 8px;
+    margin: 5px 0;
+    height: 22px;
+    width: 30px;
+    color: #eee;
+    text-align: center;
+}
