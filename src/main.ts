@@ -1,15 +1,16 @@
 import { Chart } from './Chart';
 import { GraphQLFetcher } from './GraphQLFetcher';
-import { DataFromatter } from './DataFromatter';
 import { DataSet } from './DataSet';
 import { Data } from './Data';
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { Logging } from './Logging';
 dayjs.extend(utc)
 dayjs.extend(timezone);
 
+const logging: Logging = new Logging();
 
 function loadingStart() {
     const loadingMsgBox: HTMLElement = <HTMLElement>document.querySelector('#loading_msg');
@@ -43,7 +44,7 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
             }
             resolve(dataSet);
         } catch (error) {
-            console.error(error);
+            logging.error(error);
             alert('データ取得に失敗しました');
             const loginPane: HTMLElement = <HTMLElement>document.querySelector('#login_pane');
             loginPane.style.display = 'block';
@@ -313,7 +314,7 @@ function demoDataReader(dataSet: DataSet): Promise<any> {
     return new Promise(async (resolve, reject) => {
         let result = await fetch('../tool/sample_data.json');
         let jsonMsg: any = await result.json();
-        console.log(jsonMsg);
+        logging.info(jsonMsg);
 
         Object.keys(jsonMsg).forEach(key => {
             // if (!dataSet.hasDate(key)) {

@@ -4,7 +4,9 @@ import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 // タイムゾーンを使うためのおまじない
 import timezone from 'dayjs/plugin/timezone';
+import { Logging } from './Logging';
 dayjs.extend(timezone);
+const logging: Logging = new Logging();
 
 export class Data {
     private _data: { dateStr: string, energy: number, cost: number }[] = [];
@@ -33,7 +35,7 @@ export class Data {
                 cost: Math.floor(c[day] * 100) / 100
             };
         });
-        // console.log(this._data)
+        logging.debug(this._data)
     }
 
     public get energy() {
@@ -77,6 +79,6 @@ export class Data {
     }
 
     public dump() {
-        this._data.forEach(d => console.log(d));
+        this._data.forEach(d => logging.info(d));
     }
 }

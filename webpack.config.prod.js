@@ -1,5 +1,5 @@
 module.exports = {
-	mode: "development",
+	mode: "production",
 	entry: "./src/main.ts",
 	output: {
 		path: `${__dirname}/dist`,
@@ -16,4 +16,4 @@ module.exports = {
 	resolve: {
 		extensions: [".ts", ".js"]
 	}
-	};
+};
