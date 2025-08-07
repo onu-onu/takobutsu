@@ -1,15 +1,16 @@
 import { Chart } from './Chart';
 import { GraphQLFetcher } from './GraphQLFetcher';
-import { DataFromatter } from './DataFromatter';
 import { DataSet } from './DataSet';
 import { Data } from './Data';
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { Logging } from './Logging';
 dayjs.extend(utc)
 dayjs.extend(timezone);
 
+const logging: Logging = new Logging();
 
 function loadingStart() {
     const loadingMsgBox: HTMLElement = <HTMLElement>document.querySelector('#loading_msg');
@@ -25,6 +26,7 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
         const graphqlClient: GraphQLFetcher = new GraphQLFetcher();
         try {
             const token = await graphqlClient.getToken(email, pass);
+            logging.debug('graphql token:', token);
 
             let startDayjs = dayjs(startDate);
             let endDayjs = dayjs(endDate);
@@ -33,17 +35,19 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
                 let headDate = crntDayjs.startOf('month').format('YYYY-MM-DDTHH:mm:ssZ[Z]');
                 let tailDate = crntDayjs.endOf('month').format('YYYY-MM-DDTHH:mm:ssZ[Z]');
                 let key = crntDayjs.format('YYYY-MM');
-
+                console.debug(`getData(): from ${headDate} to ${tailDate}`)
                 if (!dataSet.hasDate(key)) {
                     let data = await graphqlClient.getUsedData(token.token, id, headDate, tailDate);
-                    dataSet.append(key, new Data(data));
+                    if (data != null) {
+                        dataSet.append(key, new Data(data));
+                    }
                 }
 
                 crntDayjs = crntDayjs.add(1, 'M');
             }
             resolve(dataSet);
         } catch (error) {
-            console.error(error);
+            logging.error(error);
             alert('データ取得に失敗しました');
             const loginPane: HTMLElement = <HTMLElement>document.querySelector('#login_pane');
             loginPane.style.display = 'block';
@@ -143,52 +147,71 @@ window.onload = () => {
     const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
 
     async function draw(y: string, m: string) {
+        let lightColor = '#c1d0e6';
+        let accentColor = '#eeff00';
+
+        logging.debug('start draw');
+        let compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
+        logging.debug('compare mode:', compTgl.checked);
+        let startyyyymm = `${y}-${m}`;
+        let endyyyymm = `${y}-${m}`;
+        let startyyyy = y;
+        let endyyyy = y;
+
+        if (compTgl.checked) {
+            startyyyymm = dayjs(endyyyymm).add(-1, 'M').format('YYYY-MM');
+            startyyyy = String(Number(endyyyy) - 1)
+        }
+
         dataSet = await getData(dataSet,
             String(emailTexarea.value),
             String(passTexarea.value),
             String(userIdTexarea.value),
-            `${y}-01`,
-            `${y}-12`);
-    
-        let today = `${y}-${m}`;
-        let dailyData = dataSet.rangeDailyData(today, today);
+            `${startyyyy}-01`,
+            `${endyyyy}-12`);
+
+        logging.debug(dataSet);
+
+        let dailyData = dataSet.rangeDailyData(startyyyymm, endyyyymm);
+        logging.debug(dailyData);
         monthlyChart.clear();
-        monthlyChart.drawBarAndLine(dailyData);
-    
-        let monthlyData = dataSet.rangeMonthlyData(y, y);
+        if (dailyData.length != 0) {
+            monthlyChart.setupXaxis(dailyData);
+            monthlyChart.setupLeftAxis(dailyData);
+            monthlyChart.setupRightAxis(dailyData);
+            monthlyChart.drawBar(dailyData, lightColor, 0);
+            monthlyChart.drawLine(dailyData, accentColor, 0);
+        } else {
+            // alert('no data')
+        }
+
+
+        let monthlyData = dataSet.rangeMonthlyData(startyyyy, endyyyy);
         yearlyChart.clear();
-        yearlyChart.drawBarAndLine(monthlyData);
-    
+        if (monthlyData.length != 0) {
+            yearlyChart.setupXaxis(monthlyData);
+            yearlyChart.setupLeftAxis(monthlyData);
+            yearlyChart.setupRightAxis(monthlyData);
+            yearlyChart.drawBar(monthlyData, lightColor, 0);
+            yearlyChart.drawLine(monthlyData, accentColor, 0);
+        } else {
+            // alert('no data')
+        }
+
         let dailyYearData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
         yearlyHeatmap.clear();
         yearlyHeatmap.drawCalHeatmap(dailyYearData);
     }
 
     submitBtn.addEventListener('click', async () => {
+        logging.debug('click submit btn');
         loginPane.style.display = 'none';
 
         loadingStart();
         let thisYear = dayjs().format('YYYY');
         let thisMonth = dayjs().format('MM');
+        console.info(thisYear, thisMonth)
         await draw(thisYear, thisMonth);
-        // dataSet = await getData(dataSet,
-        //     String(emailTexarea.value),
-        //     String(passTexarea.value),
-        //     String(userIdTexarea.value),
-        //     `${thisYear}-01`,
-        //     `${thisYear}-12`);
-        // // dataSet = await demoDataReader(dataSet);
-
-        // let today = dayjs().format('YYYY-MM');
-        // let dailyData = dataSet.rangeDailyData(today, today);
-        // monthlyChart.drawBarAndLine(dailyData);
-
-        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        // yearlyChart.drawBarAndLine(monthlyData);
-
-        // let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
-        // yearlyHeatmap.clear();
-        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
 
         const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
         chartPane.style.display = 'block';
@@ -202,25 +225,6 @@ window.onload = () => {
         let thisYear = yearSlcter.value;
         let thisMonth = monthSlcter.value;
         await draw(thisYear, thisMonth);
-        // dataSet = await getData(dataSet,
-        //     String(emailTexarea.value),
-        //     String(passTexarea.value),
-        //     String(userIdTexarea.value),
-        //     `${thisYear}-01`,
-        //     `${thisYear}-12`);
-
-        // let today = `${yearSlcter.value}-${monthSlcter.value}`;
-        // let dailyData = dataSet.rangeDailyData(today, today);
-        // monthlyChart.clear();
-        // monthlyChart.drawBarAndLine(dailyData);
-
-        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        // yearlyChart.clear();
-        // yearlyChart.drawBarAndLine(monthlyData);
-
-        // let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
-        // yearlyHeatmap.clear();
-        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
 
@@ -229,21 +233,6 @@ window.onload = () => {
         let thisYear = yearSlcter.value;
         let thisMonth = monthSlcter.value;
         await draw(thisYear, thisMonth);
-        // let today = `${yearSlcter.value}-${monthSlcter.value}`;
-        
-        
-        // let dailyData = dataSet.rangeDailyData(today, today);
-        // monthlyChart.clear();
-        // monthlyChart.drawBarAndLine(dailyData);
-
-        // let thisYear = yearSlcter.value;
-        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        // yearlyChart.clear();
-        // yearlyChart.drawBarAndLine(monthlyData)
-
-        // let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
-        // yearlyHeatmap.clear();
-        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
 
@@ -263,7 +252,7 @@ window.onload = () => {
             loadingStart();
             await draw(y, m);
             loadingEnd();
-        } else if(yearChartSlct) {
+        } else if (yearChartSlct) {
             let thisYear = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
             let prevYear = thisYear.add(-1, 'year');
             let m = '1';
@@ -275,7 +264,7 @@ window.onload = () => {
             await draw(y, m);
             loadingEnd();
         }
-        
+
     });
 
     const nextBtn = <HTMLButtonElement>document.querySelector('#next');
@@ -294,7 +283,7 @@ window.onload = () => {
             loadingStart();
             await draw(y, m);
             loadingEnd();
-        } else if(yearChartSlct) {
+        } else if (yearChartSlct) {
             let thisYear = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
             let prevYear = thisYear.add(1, 'year');
             let m = '1';
@@ -307,13 +296,23 @@ window.onload = () => {
             loadingEnd();
         }
     });
+
+    const compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
+    compTgl.addEventListener('change', async () => {
+        logging.debug('compare mode:', compTgl.checked);
+        loadingStart();
+        let thisYear = yearSlcter.value;
+        let thisMonth = monthSlcter.value;
+        await draw(thisYear, thisMonth);
+        loadingEnd();
+    });
 }
 
 function demoDataReader(dataSet: DataSet): Promise<any> {
     return new Promise(async (resolve, reject) => {
         let result = await fetch('../tool/sample_data.json');
         let jsonMsg: any = await result.json();
-        console.log(jsonMsg);
+        logging.info(jsonMsg);
 
         Object.keys(jsonMsg).forEach(key => {
             // if (!dataSet.hasDate(key)) {
