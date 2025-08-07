@@ -49,12 +49,14 @@ h1 {
     padding: 20px 0 0 0;
     font-family: "Nunito", sans-serif;
 }
-h1 .tako{
+.tako{
     font-weight: 900;
+    font-family: "Nunito", sans-serif;
 }
-h1 .butsu {
+.butsu {
     font-weight: 100;
     font-size: 80%;
+    font-family: "Nunito", sans-serif;
 }
 
 #info {
@@ -69,11 +71,9 @@ h1 .butsu {
 
 #release-note {
     text-align: left;
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, 0);
-    margin: 10px, 0;
-    width: auto;
+    position: relative;
+    width: 95%;
+    transform: translate(5%, 20px   );
     font-weight: 300;
     line-height: 2em;
 }
