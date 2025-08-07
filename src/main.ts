@@ -147,24 +147,56 @@ window.onload = () => {
     const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
 
     async function draw(y: string, m: string) {
+        let lightColor = '#c1d0e6';
+        let accentColor = '#eeff00';
+
         logging.debug('start draw');
+        let compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
+        logging.debug('compare mode:', compTgl.checked);
+        let startyyyymm = `${y}-${m}`;
+        let endyyyymm = `${y}-${m}`;
+        let startyyyy = y;
+        let endyyyy = y;
+
+        if (compTgl.checked) {
+            startyyyymm = dayjs(endyyyymm).add(-1, 'M').format('YYYY-MM');
+            startyyyy = String(Number(endyyyy) - 1)
+        }
+
         dataSet = await getData(dataSet,
             String(emailTexarea.value),
             String(passTexarea.value),
             String(userIdTexarea.value),
-            `${y}-01`,
-            `${y}-12`);
+            `${startyyyy}-01`,
+            `${endyyyy}-12`);
 
         logging.debug(dataSet);
 
-        let today = `${y}-${m}`;
-        let dailyData = dataSet.rangeDailyData(today, today);
+        let dailyData = dataSet.rangeDailyData(startyyyymm, endyyyymm);
+        logging.debug(dailyData);
         monthlyChart.clear();
-        monthlyChart.drawBarAndLine(dailyData);
+        if (dailyData.length != 0) {
+            monthlyChart.setupXaxis(dailyData);
+            monthlyChart.setupLeftAxis(dailyData);
+            monthlyChart.setupRightAxis(dailyData);
+            monthlyChart.drawBar(dailyData, lightColor, 0);
+            monthlyChart.drawLine(dailyData, accentColor, 0);
+        } else {
+            // alert('no data')
+        }
 
-        let monthlyData = dataSet.rangeMonthlyData(y, y);
+
+        let monthlyData = dataSet.rangeMonthlyData(startyyyy, endyyyy);
         yearlyChart.clear();
-        yearlyChart.drawBarAndLine(monthlyData);
+        if (monthlyData.length != 0) {
+            yearlyChart.setupXaxis(monthlyData);
+            yearlyChart.setupLeftAxis(monthlyData);
+            yearlyChart.setupRightAxis(monthlyData);
+            yearlyChart.drawBar(monthlyData, lightColor, 0);
+            yearlyChart.drawLine(monthlyData, accentColor, 0);
+        } else {
+            // alert('no data')
+        }
 
         let dailyYearData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
         yearlyHeatmap.clear();
@@ -193,25 +225,6 @@ window.onload = () => {
         let thisYear = yearSlcter.value;
         let thisMonth = monthSlcter.value;
         await draw(thisYear, thisMonth);
-        // dataSet = await getData(dataSet,
-        //     String(emailTexarea.value),
-        //     String(passTexarea.value),
-        //     String(userIdTexarea.value),
-        //     `${thisYear}-01`,
-        //     `${thisYear}-12`);
-
-        // let today = `${yearSlcter.value}-${monthSlcter.value}`;
-        // let dailyData = dataSet.rangeDailyData(today, today);
-        // monthlyChart.clear();
-        // monthlyChart.drawBarAndLine(dailyData);
-
-        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        // yearlyChart.clear();
-        // yearlyChart.drawBarAndLine(monthlyData);
-
-        // let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
-        // yearlyHeatmap.clear();
-        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
 
@@ -220,21 +233,6 @@ window.onload = () => {
         let thisYear = yearSlcter.value;
         let thisMonth = monthSlcter.value;
         await draw(thisYear, thisMonth);
-        // let today = `${yearSlcter.value}-${monthSlcter.value}`;
-
-
-        // let dailyData = dataSet.rangeDailyData(today, today);
-        // monthlyChart.clear();
-        // monthlyChart.drawBarAndLine(dailyData);
-
-        // let thisYear = yearSlcter.value;
-        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        // yearlyChart.clear();
-        // yearlyChart.drawBarAndLine(monthlyData)
-
-        // let dailyYearData = dataSet.rangeDailyData(`${yearSlcter.value}-01`, `${yearSlcter.value}-12`);
-        // yearlyHeatmap.clear();
-        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
         loadingEnd();
     });
 
@@ -297,6 +295,16 @@ window.onload = () => {
             await draw(y, m);
             loadingEnd();
         }
+    });
+
+    const compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
+    compTgl.addEventListener('change', async () => {
+        logging.debug('compare mode:', compTgl.checked);
+        loadingStart();
+        let thisYear = yearSlcter.value;
+        let thisMonth = monthSlcter.value;
+        await draw(thisYear, thisMonth);
+        loadingEnd();
     });
 }
 

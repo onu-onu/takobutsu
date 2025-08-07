@@ -13,8 +13,11 @@ export class Chart {
     private width: number;
     private height: number;
     private xScale: any = null;
+    private yScale: any = null;
+    private yScale2: any = null;
     private barMax: number = 0;
     private lineMax: number = 0;
+
 
     constructor(idName: string, _width: number, _height: number, margin: { top: number, right: number, bottom: number, left: number }) {
         this.width = _width - margin.left - margin.right;
@@ -33,77 +36,24 @@ export class Chart {
         this.svg.selectAll('*').remove()
     }
 
-    public drawBarAndLine(data: any) {
-        const lightColor = '#c1d0e6';
-        const accentColor = '#eeff00';
 
-        const svg = this.svg;
-        const width = this.width;
-        const height = this.height;
+    private mouseOver(e: any, d: any) {
+        d3.select('#tooltip')
+            .style('top', `${e.pageY}px`)
+            .style('left', `${e.pageX}px`)
+            .style('display', 'block')
+            .html(`<div>${d.dateStr}</div><div>${d.energy.toFixed(2)} kWh</div><div>${d.cost.toFixed(2)} 円</div>`);
+    }
 
-        if (data.length == 0) {
-            svg.append('text')
-                .attr('x', width / 2)
-                .attr('y', height / 2)
-                .attr('text-anchor', 'middle')
-                .attr('text-align', 'center')
-                .attr('font-size', `24px`)
-                .attr('fill', '#eee')
-                .text('no data');
-            return;
-        }
-
-        let mouseOver = (e: any, d: any) => {
-            d3.select('#tooltip')
-                .style('top', `${e.pageY}px`)
-                .style('left', `${e.pageX}px`)
-                .style('display', 'block')
-                .html(`<div>${d.dateStr}</div><div>${d.energy.toFixed(2)} kWh</div><div>${d.cost.toFixed(2)} 円</div>`);
-        }
-
+    public setupXaxis(data: any) {
         let padding: number = data.length >= 15 ? 0.3 : 0.2;
         this.xScale = d3.scaleBand()
-            .range([0, width])
+            .range([0, this.width])
             .domain(data.map((d: any) => d.dateStr))
             .padding(padding);
 
-        let ymax = Number(d3.max(data, (d: any) => +Number(d.energy)));
-        if (ymax > this.barMax) this.barMax = ymax;
-        let yScale = d3.scaleLinear()
-            .domain([0, this.barMax])
-            .range([height, 0]);
-
-        let r = data.length <= 15 ? 5 : this.xScale.bandwidth() * 0.2;
-        svg.selectAll('mybar')
-            .data(data)
-            .join('rect')
-            .attr('x', (d: any) => <any>this.xScale(d.dateStr))
-            .attr('y', (d: any) => yScale(d.energy))
-            .attr('width', this.xScale.bandwidth())
-            .attr('height', (d: any) => height - yScale(d.energy))
-            .attr('fill', lightColor)
-            .attr('stroke', lightColor)
-            .attr('rx', r)
-            .attr('ry', r)
-            .on('mouseover', (e: any, d: any) => mouseOver(e, d))
-            .on('mousemove', (e: any, d: any) => mouseOver(e, d))
-            .on('mouseout', (e: any, d: any) => {
-                d3.select('#tooltip').style('display', 'none');
-            });
-
-        svg.append('g')
-            .call(d3.axisLeft(yScale).ticks(5));
-        svg.append('text')
-            .attr('x', 0)
-            .attr('y', -10)
-            .attr('text-anchor', 'top')
-            .attr('text-align', 'center')
-            .attr('font-size', `12px`)
-            .attr('fill', '#eee')
-            .text('kWh');
-
-        let xAxis = svg.append('g')
-            .attr('transform', `translate(0, ${height})`)
+        let xAxis = this.svg.append('g')
+            .attr('transform', `translate(0, ${this.height})`)
             .call(d3.axisBottom(this.xScale));
         xAxis.selectAll('text')
             .attr('transform', `translate(-10, 5)rotate(-60)`)
@@ -117,56 +67,106 @@ export class Chart {
                 }
             });
         }
+    }
 
+    public setupLeftAxis(data: any) {
+        let ymax = Number(d3.max(data, (d: any) => +Number(d.energy)));
+        if (ymax > this.barMax) {
+            this.barMax = ymax;
+        }
+        this.yScale = d3.scaleLinear()
+            .domain([0, this.barMax])
+            .range([this.height, 0]);
+        this.svg.append('g')
+            .call(d3.axisLeft(this.yScale).ticks(5));
+        this.svg.append('text')
+            .attr('x', 0)
+            .attr('y', -10)
+            .attr('text-anchor', 'top')
+            .attr('text-align', 'center')
+            .attr('font-size', `12px`)
+            .attr('fill', '#eee')
+            .text('kWh');
+    }
+
+    public setupRightAxis(data:any) {
         let ymax2 = Number(d3.max(data, (d: any) => +d.cost));
-        if(ymax2 > this.lineMax) this.lineMax = ymax2;
-        let yScale2 = d3.scaleLinear()
+        if (ymax2 > this.lineMax) {
+            this.lineMax = ymax2;
+        }
+
+        this.yScale2 = d3.scaleLinear()
             .domain([0, this.lineMax * 2])
-            .range([height, 0]);
-        svg.append('g')
-            .attr('transform', `translate(${width}, 0)`)
-            .call(d3.axisRight(yScale2));
-        svg.append('text')
-            .attr('x', width)
+            .range([this.height, 0]);
+            
+        this.svg.append('g')
+            .attr('transform', `translate(${this.width}, 0)`)
+            .call(d3.axisRight(this.yScale2));
+        this.svg.append('text')
+            .attr('x', this.width)
             .attr('y', -10)
             .attr('text-anchor', 'end')
             .attr('text-align', 'center')
             .attr('font-size', `12px`)
             .attr('fill', '#eee')
             .text('円');
+    }
 
-        svg.append('path')
-            .datum(data)
-            .attr('fill', 'none')
-            .attr('stroke', accentColor)
-            .attr('stroke-width', 3)
-            .attr('d', d3.line()
-                .x((d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
-                .y((d: any) => yScale2(d.cost))
-            )
-            .on('mouseover', (e: any, d: any) => mouseOver(e, d))
-            .on('mousemove', (e: any, d: any) => mouseOver(e, d))
-            .on('mouseout', (e: any, d: any) => {
-                d3.select('#tooltip').style('display', 'none');
-            });
-
-        svg.append('g')
-            .selectAll('dot')
+    public drawBar(data: any, color: string, margin: number) {
+        let r = data.length <= 15 ? 5 : this.xScale.bandwidth() * 0.2;
+        this.svg.selectAll('mybar')
             .data(data)
-            .enter()
-            .append('circle')
-            .attr('cx', (d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
-            .attr('cy', (d: any) => yScale2(d.cost))
-            .attr('r', 4.5)
-            .style('fill', accentColor)
-            .on('mouseover', (e: any, d: any) => mouseOver(e, d))
-            .on('mousemove', (e: any, d: any) => mouseOver(e, d))
+            .join('rect')
+            .attr('x', (d: any) => <any>this.xScale(d.dateStr))
+            .attr('y', (d: any) => this.yScale(d.energy))
+            .attr('width', this.xScale.bandwidth())
+            .attr('height', (d: any) => this.height - this.yScale(d.energy))
+            .attr('fill', color)
+            .attr('stroke', color)
+            .attr('rx', r)
+            .attr('ry', r)
+            .attr('transform', `translate(${margin}, 0)`)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
             .on('mouseout', (e: any, d: any) => {
                 d3.select('#tooltip').style('display', 'none');
             });
     }
 
-    
+    public drawLine(data: any, color: string, margin: number) {
+        this.svg.append('path')
+            .datum(data)
+            .attr('fill', 'none')
+            .attr('stroke', color)
+            .attr('stroke-width', 3)
+            .attr('d', d3.line()
+                .x((d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
+                .y((d: any) => this.yScale2(d.cost))
+            )
+            .attr('transform', `translate(${margin}, 0)`)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+
+        this.svg.append('g')
+            .selectAll('dot')
+            .data(data)
+            .enter()
+            .append('circle')
+            .attr('cx', (d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
+            .attr('cy', (d: any) => this.yScale2(d.cost))
+            .attr('r', 4.5)
+            .style('fill', color)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+    }
+
+
 
     public drawCalHeatmap(data: any) {
         const lightColor = '#c1d0e6';
