@@ -26,6 +26,7 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
         const graphqlClient: GraphQLFetcher = new GraphQLFetcher();
         try {
             const token = await graphqlClient.getToken(email, pass);
+            logging.debug('graphql token:', token);
 
             let startDayjs = dayjs(startDate);
             let endDayjs = dayjs(endDate);
@@ -34,10 +35,12 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
                 let headDate = crntDayjs.startOf('month').format('YYYY-MM-DDTHH:mm:ssZ[Z]');
                 let tailDate = crntDayjs.endOf('month').format('YYYY-MM-DDTHH:mm:ssZ[Z]');
                 let key = crntDayjs.format('YYYY-MM');
-
+                console.debug(`getData(): from ${headDate} to ${tailDate}`)
                 if (!dataSet.hasDate(key)) {
                     let data = await graphqlClient.getUsedData(token.token, id, headDate, tailDate);
-                    dataSet.append(key, new Data(data));
+                    if (data != null) {
+                        dataSet.append(key, new Data(data));
+                    }
                 }
 
                 crntDayjs = crntDayjs.add(1, 'M');
@@ -144,52 +147,39 @@ window.onload = () => {
     const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
 
     async function draw(y: string, m: string) {
+        logging.debug('start draw');
         dataSet = await getData(dataSet,
             String(emailTexarea.value),
             String(passTexarea.value),
             String(userIdTexarea.value),
             `${y}-01`,
             `${y}-12`);
-    
+
+        logging.debug(dataSet);
+
         let today = `${y}-${m}`;
         let dailyData = dataSet.rangeDailyData(today, today);
         monthlyChart.clear();
         monthlyChart.drawBarAndLine(dailyData);
-    
+
         let monthlyData = dataSet.rangeMonthlyData(y, y);
         yearlyChart.clear();
         yearlyChart.drawBarAndLine(monthlyData);
-    
+
         let dailyYearData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
         yearlyHeatmap.clear();
         yearlyHeatmap.drawCalHeatmap(dailyYearData);
     }
 
     submitBtn.addEventListener('click', async () => {
+        logging.debug('click submit btn');
         loginPane.style.display = 'none';
 
         loadingStart();
         let thisYear = dayjs().format('YYYY');
         let thisMonth = dayjs().format('MM');
+        console.info(thisYear, thisMonth)
         await draw(thisYear, thisMonth);
-        // dataSet = await getData(dataSet,
-        //     String(emailTexarea.value),
-        //     String(passTexarea.value),
-        //     String(userIdTexarea.value),
-        //     `${thisYear}-01`,
-        //     `${thisYear}-12`);
-        // // dataSet = await demoDataReader(dataSet);
-
-        // let today = dayjs().format('YYYY-MM');
-        // let dailyData = dataSet.rangeDailyData(today, today);
-        // monthlyChart.drawBarAndLine(dailyData);
-
-        // let monthlyData = dataSet.rangeMonthlyData(thisYear, thisYear);
-        // yearlyChart.drawBarAndLine(monthlyData);
-
-        // let dailyYearData = dataSet.rangeDailyData(`${thisYear}-01`, `${thisYear}-12`);
-        // yearlyHeatmap.clear();
-        // yearlyHeatmap.drawCalHeatmap(dailyYearData);
 
         const chartPane: HTMLElement = <HTMLElement>document.querySelector('#chart_pane');
         chartPane.style.display = 'block';
@@ -231,8 +221,8 @@ window.onload = () => {
         let thisMonth = monthSlcter.value;
         await draw(thisYear, thisMonth);
         // let today = `${yearSlcter.value}-${monthSlcter.value}`;
-        
-        
+
+
         // let dailyData = dataSet.rangeDailyData(today, today);
         // monthlyChart.clear();
         // monthlyChart.drawBarAndLine(dailyData);
@@ -264,7 +254,7 @@ window.onload = () => {
             loadingStart();
             await draw(y, m);
             loadingEnd();
-        } else if(yearChartSlct) {
+        } else if (yearChartSlct) {
             let thisYear = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
             let prevYear = thisYear.add(-1, 'year');
             let m = '1';
@@ -276,7 +266,7 @@ window.onload = () => {
             await draw(y, m);
             loadingEnd();
         }
-        
+
     });
 
     const nextBtn = <HTMLButtonElement>document.querySelector('#next');
@@ -295,7 +285,7 @@ window.onload = () => {
             loadingStart();
             await draw(y, m);
             loadingEnd();
-        } else if(yearChartSlct) {
+        } else if (yearChartSlct) {
             let thisYear = dayjs(`${yearSlcter.value}-${monthSlcter.value}`);
             let prevYear = thisYear.add(1, 'year');
             let m = '1';
