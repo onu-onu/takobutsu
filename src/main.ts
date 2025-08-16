@@ -49,8 +49,8 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
         } catch (error) {
             logging.error(error);
             alert('データ取得に失敗しました');
-            const loginPane: HTMLElement = <HTMLElement>document.querySelector('#login_pane');
-            loginPane.style.display = 'block';
+            (<HTMLElement>document.querySelector('#login_pane')).style.display = 'block';
+            (<HTMLElement>document.querySelector('#chart_pane')).style.display = 'none';
             loadingEnd();
         }
     });
@@ -123,6 +123,7 @@ function setupParams() {
     }
 }
 
+
 window.onload = () => {
     const submitBtn: HTMLInputElement = <HTMLInputElement>document.querySelector('#submit');
     const emailTexarea: HTMLInputElement = <HTMLInputElement>document.querySelector('#email');
@@ -145,62 +146,51 @@ window.onload = () => {
     const monthlyChart = new Chart('#month_chart', chartW, chartH, { top: 20, right: 50, bottom: 80, left: 50 });
     const yearlyChart = new Chart('#year_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 60, left: 50 });
     const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
+    const compThisMonthlyChart = new Chart('#this_month_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
+    const compPrevMonthlyChart = new Chart('#prev_month_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
+    const compYearlyChart = new Chart('#year_compare_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 60, left: 50 });
+    const compYearlyHeatmap = new Chart('#compare_heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
 
     async function draw(y: string, m: string) {
         let lightColor = '#c1d0e6';
         let accentColor = '#eeff00';
 
         logging.debug('start draw');
-        let compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
-        logging.debug('compare mode:', compTgl.checked);
-        let startyyyymm = `${y}-${m}`;
-        let endyyyymm = `${y}-${m}`;
-        let startyyyy = y;
-        let endyyyy = y;
-
-        if (compTgl.checked) {
-            startyyyymm = dayjs(endyyyymm).add(-1, 'M').format('YYYY-MM');
-            startyyyy = String(Number(endyyyy) - 1)
-        }
+        let thisyyyymm = `${y}-${m}`;
+        let thisyyyy = y;
+        let prevyyyymm = dayjs(thisyyyymm).add(-1, 'M').format('YYYY-MM');
+        let prevyyyy = String(Number(thisyyyy) - 1);
 
         dataSet = await getData(dataSet,
             String(emailTexarea.value),
             String(passTexarea.value),
             String(userIdTexarea.value),
-            `${startyyyy}-01`,
-            `${endyyyy}-12`);
+            `${thisyyyy}-01`,
+            `${thisyyyy}-12`);
 
         logging.debug(dataSet);
 
-        let dailyData = dataSet.rangeDailyData(startyyyymm, endyyyymm);
-        logging.debug(dailyData);
+        let thismonthDailyData = dataSet.rangeDailyData(thisyyyymm, thisyyyymm);
+        logging.debug(thismonthDailyData);
         monthlyChart.clear();
-        if (dailyData.length != 0) {
-            monthlyChart.setupXaxis(dailyData);
-            monthlyChart.setupLeftAxis(dailyData);
-            monthlyChart.setupRightAxis(dailyData);
-            monthlyChart.drawBar(dailyData, lightColor, 0);
-            monthlyChart.drawLine(dailyData, accentColor, 0);
-        } else {
-            // alert('no data')
-        }
+        monthlyChart.setupXaxis(thismonthDailyData);
+        monthlyChart.setupLeftAxis(thismonthDailyData);
+        monthlyChart.setupRightAxis(thismonthDailyData);
+        monthlyChart.drawBar(thismonthDailyData, lightColor, 0);
+        monthlyChart.drawLine(thismonthDailyData, accentColor, 0);
 
-
-        let monthlyData = dataSet.rangeMonthlyData(startyyyy, endyyyy);
+        let thisyearMonthlyData = dataSet.rangeMonthlyData(thisyyyy, thisyyyy);
         yearlyChart.clear();
-        if (monthlyData.length != 0) {
-            yearlyChart.setupXaxis(monthlyData);
-            yearlyChart.setupLeftAxis(monthlyData);
-            yearlyChart.setupRightAxis(monthlyData);
-            yearlyChart.drawBar(monthlyData, lightColor, 0);
-            yearlyChart.drawLine(monthlyData, accentColor, 0);
-        } else {
-            // alert('no data')
-        }
-
-        let dailyYearData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
+        let thisyearDailyData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
         yearlyHeatmap.clear();
-        yearlyHeatmap.drawCalHeatmap(dailyYearData);
+        yearlyChart.setupXaxis(thisyearMonthlyData);
+        yearlyChart.setupLeftAxis(thisyearMonthlyData);
+        yearlyChart.setupRightAxis(thisyearMonthlyData);
+        yearlyChart.drawBar(thisyearMonthlyData, lightColor, 0);
+        yearlyChart.drawLine(thisyearMonthlyData, accentColor, 0);
+        yearlyHeatmap.drawCalHeatmap(thisyearDailyData);
+  
+        let prevmonthDailyData = dataSet.rangeDailyData(prevyyyymm, prevyyyymm);
     }
 
     submitBtn.addEventListener('click', async () => {
@@ -306,7 +296,11 @@ window.onload = () => {
         await draw(thisYear, thisMonth);
         loadingEnd();
     });
+
+
 }
+
+
 
 function demoDataReader(dataSet: DataSet): Promise<any> {
     return new Promise(async (resolve, reject) => {

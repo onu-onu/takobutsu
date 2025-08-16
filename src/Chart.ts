@@ -33,7 +33,7 @@ export class Chart {
     }
 
     public clear() {
-        this.svg.selectAll('*').remove()
+        this.svg.selectAll('*').remove();
     }
 
 
@@ -45,7 +45,24 @@ export class Chart {
             .html(`<div>${d.dateStr}</div><div>${d.energy.toFixed(2)} kWh</div><div>${d.cost.toFixed(2)} 円</div>`);
     }
 
+    private nodataAction() {
+        this.svg.append('text')
+            .attr('x', this.width / 2)
+            .attr('y', this.height / 2)
+            .attr('text-anchor', 'middle')
+            .attr('text-align', 'center')
+            .attr('font-size', `24px`)
+            .attr('fill', '#eee')
+            .text('no data 🫠');
+    }
+
     public setupXaxis(data: any) {
+        if (data.length == 0) {
+            this.nodataAction();
+            return;
+        }
+        
+
         let padding: number = data.length >= 15 ? 0.3 : 0.2;
         this.xScale = d3.scaleBand()
             .range([0, this.width])
@@ -70,6 +87,11 @@ export class Chart {
     }
 
     public setupLeftAxis(data: any) {
+        if (data.length == 0) {
+            this.nodataAction();
+            return;
+        }
+
         let ymax = Number(d3.max(data, (d: any) => +Number(d.energy)));
         if (ymax > this.barMax) {
             this.barMax = ymax;
@@ -90,6 +112,12 @@ export class Chart {
     }
 
     public setupRightAxis(data:any) {
+        if (data.length == 0) {
+            this.nodataAction();
+            return;
+        }
+        
+
         let ymax2 = Number(d3.max(data, (d: any) => +d.cost));
         if (ymax2 > this.lineMax) {
             this.lineMax = ymax2;
@@ -113,6 +141,12 @@ export class Chart {
     }
 
     public drawBar(data: any, color: string, margin: number) {
+        if (data.length == 0) {
+            this.nodataAction();
+            return;
+        }
+        
+
         let r = data.length <= 15 ? 5 : this.xScale.bandwidth() * 0.2;
         this.svg.selectAll('mybar')
             .data(data)
@@ -134,6 +168,12 @@ export class Chart {
     }
 
     public drawLine(data: any, color: string, margin: number) {
+        if (data.length == 0) {
+            this.nodataAction();
+            return;
+        }
+        
+
         this.svg.append('path')
             .datum(data)
             .attr('fill', 'none')
@@ -169,12 +209,14 @@ export class Chart {
 
 
     public drawCalHeatmap(data: any) {
-        const lightColor = '#c1d0e6';
-        const baseColor = '#1e2a38';
-
         if (data.length == 0) {
+            this.nodataAction();
             return;
         }
+        
+
+        const lightColor = '#c1d0e6';
+        const baseColor = '#1e2a38';
 
         data = this.prepareDataForHeatmap(data);
         const svg = this.svg;
