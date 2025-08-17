@@ -16,8 +16,7 @@ export class Data {
         let c: any = {};
         let keys: string[] = [];
         rawData.forEach(d => {
-            let day: string = dayjs(d.startAt)
-                .tz('Asia/Tokyo')
+            let day: string = dayjs.utc(d.startAt)
                 .format('YYYY-MM-DD');
             if (keys.includes(day)) {
                 c[day] += Number(d.costEstimate);

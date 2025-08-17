@@ -6,8 +6,9 @@ import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 // タイムゾーンを使うためのおまじない
 import timezone from 'dayjs/plugin/timezone';
+import { Logging } from './Logging';
 dayjs.extend(timezone);
-
+const logging: Logging = new Logging();
 export class Chart {
     private svg: any;
     private width: number;
@@ -56,26 +57,24 @@ export class Chart {
             .text('no data 🫠');
     }
 
-    public setupXaxis(data: any) {
+    public setupXaxis(data: any, title: string) {
         if (data.length == 0) {
             this.nodataAction();
             return;
         }
-        
 
         let padding: number = data.length >= 15 ? 0.3 : 0.2;
+        let uniqXlist = Array.from(new Set(data.map((d: any) => d.dateStr.split('-').at(-1))));
+        uniqXlist = [...uniqXlist].sort();
+        logging.debug('uniq x list', uniqXlist);
         this.xScale = d3.scaleBand()
             .range([0, this.width])
-            .domain(data.map((d: any) => d.dateStr))
+            .domain(<any>uniqXlist)
             .padding(padding);
 
         let xAxis = this.svg.append('g')
             .attr('transform', `translate(0, ${this.height})`)
             .call(d3.axisBottom(this.xScale));
-        xAxis.selectAll('text')
-            .attr('transform', `translate(-10, 5)rotate(-60)`)
-            .attr('text-anchor', 'end')
-            .attr('fill', '#eee');
         // 2week以上の表示はx軸の目盛文字は一個飛ばし
         if (data.length >= 15) {
             xAxis.selectAll('text')._groups[0].forEach((node: any, i: number) => {
@@ -84,6 +83,15 @@ export class Chart {
                 }
             });
         }
+
+        this.svg.append('text')
+            .text(title)
+            .attr('x', 10)
+            .attr('y', 10)
+            .attr('text-anchor', 'start')
+            .attr('text-align', 'center')
+            .attr('font-size', `12px`)
+            .attr('fill', '#eee');
     }
 
     public setupLeftAxis(data: any) {
@@ -111,12 +119,12 @@ export class Chart {
             .text('kWh');
     }
 
-    public setupRightAxis(data:any) {
+    public setupRightAxis(data: any) {
         if (data.length == 0) {
             this.nodataAction();
             return;
         }
-        
+
 
         let ymax2 = Number(d3.max(data, (d: any) => +d.cost));
         if (ymax2 > this.lineMax) {
@@ -126,7 +134,7 @@ export class Chart {
         this.yScale2 = d3.scaleLinear()
             .domain([0, this.lineMax * 2])
             .range([this.height, 0]);
-            
+
         this.svg.append('g')
             .attr('transform', `translate(${this.width}, 0)`)
             .call(d3.axisRight(this.yScale2));
@@ -145,13 +153,13 @@ export class Chart {
             this.nodataAction();
             return;
         }
-        
+
 
         let r = data.length <= 15 ? 5 : this.xScale.bandwidth() * 0.2;
         this.svg.selectAll('mybar')
             .data(data)
             .join('rect')
-            .attr('x', (d: any) => <any>this.xScale(d.dateStr))
+            .attr('x', (d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)))
             .attr('y', (d: any) => this.yScale(d.energy))
             .attr('width', this.xScale.bandwidth())
             .attr('height', (d: any) => this.height - this.yScale(d.energy))
@@ -167,12 +175,59 @@ export class Chart {
             });
     }
 
+    public drawMultiBar(data0: any, data1: any, color: string, margin: number) {
+        if (data0.length == 0 || data1.length == 0) {
+            this.nodataAction();
+            return;
+        }
+
+        let r: number = 5;
+        let w: number = this.xScale.bandwidth() - margin / 2;
+        this.svg.selectAll('mybar')
+            .data(data1)
+            .join('rect')
+            .attr('x', (d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)))
+            .attr('y', (d: any) => this.yScale(d.energy))
+            .attr('width', w)
+            .attr('height', (d: any) => this.height - this.yScale(d.energy))
+            .attr('fill', 'none')
+            .attr('stroke', color)
+            .attr('stroke-width', 2)
+            .attr("stroke-dasharray", "3,3")
+            .attr('rx', r)
+            .attr('ry', r)
+            .attr('transform', `translate(${margin}, 0)`)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+        this.svg.selectAll('mybar')
+            .data(data0)
+            .join('rect')
+            .attr('x', (d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)))
+            .attr('y', (d: any) => this.yScale(d.energy))
+            .attr('width', w)
+            .attr('height', (d: any) => this.height - this.yScale(d.energy))
+            .attr('fill', '#1e2a38')
+            .attr('stroke', color)
+            .attr('stroke-width', 2)
+            .attr('rx', r)
+            .attr('ry', r)
+            .attr('transform', `translate(${-margin}, 0)`)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+    }
+
     public drawLine(data: any, color: string, margin: number) {
         if (data.length == 0) {
             this.nodataAction();
             return;
         }
-        
+
 
         this.svg.append('path')
             .datum(data)
@@ -180,7 +235,7 @@ export class Chart {
             .attr('stroke', color)
             .attr('stroke-width', 3)
             .attr('d', d3.line()
-                .x((d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
+                .x((d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)) + this.xScale.bandwidth() / 2)
                 .y((d: any) => this.yScale2(d.cost))
             )
             .attr('transform', `translate(${margin}, 0)`)
@@ -195,10 +250,83 @@ export class Chart {
             .data(data)
             .enter()
             .append('circle')
-            .attr('cx', (d: any) => <any>this.xScale(d.dateStr) + this.xScale.bandwidth() / 2)
+            .attr('cx', (d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)) + this.xScale.bandwidth() / 2)
             .attr('cy', (d: any) => this.yScale2(d.cost))
             .attr('r', 4.5)
             .style('fill', color)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+    }
+
+    public drawMultiLine(data0: any, data1: any, color: string, margin: number) {
+        if (data0.length == 0 || data1.length == 0) {
+            this.nodataAction();
+            return;
+        }
+
+        let w: number = this.xScale.bandwidth() - margin / 2;
+        this.svg.append('path')
+            .datum(data0)
+            .attr('fill', 'none')
+            .attr('stroke', color)
+            .attr('stroke-width', 3)
+            .attr('d', d3.line()
+                .x((d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)) + w / 2)
+                .y((d: any) => this.yScale2(d.cost))
+            )
+            .attr('transform', `translate(${-margin}, 0)`)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+
+        this.svg.append('g')
+            .selectAll('dot')
+            .data(data0)
+            .enter()
+            .append('circle')
+            .attr('cx', (d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)) + w / 2)
+            .attr('cy', (d: any) => this.yScale2(d.cost))
+            .attr('r', 4.5)
+            .style('fill', color)
+            .attr('transform', `translate(${-margin}, 0)`)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+
+        this.svg.append('path')
+            .datum(data1)
+            .attr('fill', 'none')
+            .attr('stroke', color)
+            .attr('stroke-width', 3)
+            .attr("stroke-dasharray", "3,3")
+            .attr('d', d3.line()
+                .x((d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)) + w / 2)
+                .y((d: any) => this.yScale2(d.cost))
+            )
+            .attr('transform', `translate(${margin}, 0)`)
+            .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
+            .on('mouseout', (e: any, d: any) => {
+                d3.select('#tooltip').style('display', 'none');
+            });
+
+        this.svg.append('g')
+            .selectAll('dot')
+            .data(data1)
+            .enter()
+            .append('circle')
+            .attr('cx', (d: any) => <any>this.xScale(d.dateStr.split('-').at(-1)) + w / 2)
+            .attr('cy', (d: any) => this.yScale2(d.cost))
+            .attr('r', 4.5)
+            .style('fill', color)
+            .attr('transform', `translate(${margin}, 0)`)
             .on('mouseover', (e: any, d: any) => this.mouseOver(e, d))
             .on('mousemove', (e: any, d: any) => this.mouseOver(e, d))
             .on('mouseout', (e: any, d: any) => {
@@ -213,12 +341,14 @@ export class Chart {
             this.nodataAction();
             return;
         }
-        
+
 
         const lightColor = '#c1d0e6';
         const baseColor = '#1e2a38';
 
+        logging.debug('編集前のデータ', data)
         data = this.prepareDataForHeatmap(data);
+        logging.debug('編集後データ', data);
         const svg = this.svg;
         const width = this.width;
         const height = this.height;
@@ -229,20 +359,22 @@ export class Chart {
             .domain(Array.from(new Set(data.map((d: any) => d.representDate))))
             .padding(0.1);
         svg.append('g')
-            .attr('transform', 'translate(0,' + height + ')')
+            .attr('transform', `translate(0, ${height})`)
             .attr('id', 'heatmap_xaxis')
-            .call(d3.axisBottom(x).tickFormat((d: any) => d.split('-')[0]));
+            .call(d3.axisBottom(x).tickFormat((d: any) => d.split('-')[1]));
 
-        let monthChecks: string[] = []
+        let prevText: string = '';
         document.querySelectorAll('#heatmap_xaxis text')
-            .forEach((text: any) => {
-                let month = text.textContent
-                if (!monthChecks.includes(month)) {
-                    monthChecks.push(month);
-                } else {
+            .forEach((text: any, i: number) => {
+                const month: string = text.textContent;
+                if (prevText == month) {
                     text.remove();
                 }
+                prevText = month;
             });
+        svg.selectAll('#heatmap_xaxis text')
+            .attr('transform', `translate(-10, 5)rotate(-60)`)
+            .attr('text-anchor', 'end');
 
         // Build X scales and axis:
         let y = d3.scaleBand()
@@ -279,7 +411,7 @@ export class Chart {
             }
             return {
                 weekday: weekday,
-                representDate: dayjs(repDate).format('MMM-DD'),
+                representDate: dayjs(repDate).format('YYYY-MMM-DD'),
                 date: d.dateStr,
                 value: d.energy
             }

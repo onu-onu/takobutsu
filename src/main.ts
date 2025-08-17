@@ -21,9 +21,8 @@ function loadingEnd() {
     loadingMsgBox.style.display = 'none';
 }
 
-function getData(dataSet: DataSet, email: string, pass: string, id: string, startDate: string, endDate: string): Promise<DataSet> {
+function getData(graphqlClient: GraphQLFetcher, dataSet: DataSet, email: string, pass: string, id: string, startDate: string, endDate: string): Promise<DataSet> {
     return new Promise(async (resolve, reject) => {
-        const graphqlClient: GraphQLFetcher = new GraphQLFetcher();
         try {
             const token = await graphqlClient.getToken(email, pass);
             logging.debug('graphql token:', token);
@@ -58,15 +57,26 @@ function getData(dataSet: DataSet, email: string, pass: string, id: string, star
 
 function initController() {
     let radioBtns = document.querySelectorAll<HTMLInputElement>(`input[type='radio'][name='chart_select']`);
+    let compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
 
     const switchVisChart = () => {
+        logging.debug('start switchVisChart()')
         radioBtns.forEach((target: HTMLInputElement) => {
             let chartId = String(target.id).replace('_slct', '');
             let chart = <HTMLElement>document.querySelector(`#${chartId}`);
+            let compareChart = <HTMLElement>document.querySelector(`#compare_${chartId}`);
+            logging.debug(chartId, target.checked, compTgl.checked, compTgl);
             if (target.checked) {
-                chart.style.display = 'block';
+                if (compTgl.checked) {
+                    chart.style.display = 'none';
+                    compareChart.style.display = 'block';
+                } else {
+                    chart.style.display = 'block';
+                    compareChart.style.display = 'none';
+                }
             } else {
                 chart.style.display = 'none';
+                compareChart.style.display = 'none';
             }
         });
     }
@@ -83,6 +93,8 @@ function initController() {
             }
         });
     });
+    
+    compTgl.addEventListener('change', () => switchVisChart());
 
     let yearSlcter: HTMLSelectElement = <HTMLSelectElement>document.querySelector('#year_slct');
     let startYear: number = 2021;
@@ -134,6 +146,7 @@ window.onload = () => {
     const loginPane: HTMLElement = <HTMLElement>document.querySelector('#login_pane');
 
     let dataSet: DataSet = new DataSet();
+    const graphqlClient: GraphQLFetcher = new GraphQLFetcher();
 
     initController();
     setupParams();
@@ -144,12 +157,13 @@ window.onload = () => {
     let chartH = body.clientHeight - 300 < chartW ? body.clientHeight - 300 : chartW;
 
     const monthlyChart = new Chart('#month_chart', chartW, chartH, { top: 20, right: 50, bottom: 80, left: 50 });
-    const yearlyChart = new Chart('#year_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 60, left: 50 });
-    const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
-    const compThisMonthlyChart = new Chart('#this_month_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
-    const compPrevMonthlyChart = new Chart('#prev_month_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
-    const compYearlyChart = new Chart('#year_compare_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 60, left: 50 });
-    const compYearlyHeatmap = new Chart('#compare_heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
+    const yearlyChart = new Chart('#year_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
+    const yearlyHeatmap = new Chart('#heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 60, left: 50 });
+    const compThisMonthlyChart = new Chart('#this_month_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 40, left: 50 });
+    const compPrevMonthlyChart = new Chart('#prev_month_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 40, left: 50 });
+    const compYearlyChart = new Chart('#year_compare_chart', chartW, chartH / 2, { top: 20, right: 50, bottom: 30, left: 50 });
+    const compYearlyHeatmap = new Chart('#compare_heatmap', chartW, chartH / 2, { top: 20, right: 50, bottom: 60, left: 50 });
+
 
     async function draw(y: string, m: string) {
         let lightColor = '#c1d0e6';
@@ -161,36 +175,69 @@ window.onload = () => {
         let prevyyyymm = dayjs(thisyyyymm).add(-1, 'M').format('YYYY-MM');
         let prevyyyy = String(Number(thisyyyy) - 1);
 
-        dataSet = await getData(dataSet,
+        dataSet = await getData(
+            graphqlClient,
+            dataSet,
             String(emailTexarea.value),
             String(passTexarea.value),
             String(userIdTexarea.value),
-            `${thisyyyy}-01`,
+            `${prevyyyy}-01`,
             `${thisyyyy}-12`);
 
         logging.debug(dataSet);
 
+        // 今月のデータを単体表示
         let thismonthDailyData = dataSet.rangeDailyData(thisyyyymm, thisyyyymm);
         logging.debug(thismonthDailyData);
         monthlyChart.clear();
-        monthlyChart.setupXaxis(thismonthDailyData);
+        monthlyChart.setupXaxis(thismonthDailyData, thisyyyymm);
         monthlyChart.setupLeftAxis(thismonthDailyData);
         monthlyChart.setupRightAxis(thismonthDailyData);
         monthlyChart.drawBar(thismonthDailyData, lightColor, 0);
         monthlyChart.drawLine(thismonthDailyData, accentColor, 0);
 
+        logging.debug(thismonthDailyData);
+
+        // 今年のデータを単体表示
         let thisyearMonthlyData = dataSet.rangeMonthlyData(thisyyyy, thisyyyy);
         yearlyChart.clear();
-        let thisyearDailyData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
-        yearlyHeatmap.clear();
-        yearlyChart.setupXaxis(thisyearMonthlyData);
+        yearlyChart.setupXaxis(thisyearMonthlyData, thisyyyy);
         yearlyChart.setupLeftAxis(thisyearMonthlyData);
         yearlyChart.setupRightAxis(thisyearMonthlyData);
         yearlyChart.drawBar(thisyearMonthlyData, lightColor, 0);
         yearlyChart.drawLine(thisyearMonthlyData, accentColor, 0);
+        let thisyearDailyData = dataSet.rangeDailyData(`${y}-01`, `${y}-12`);
+        yearlyHeatmap.clear();
         yearlyHeatmap.drawCalHeatmap(thisyearDailyData);
   
+        // 今月と先月のデータを並置比較表示
         let prevmonthDailyData = dataSet.rangeDailyData(prevyyyymm, prevyyyymm);
+        let allDailyData = prevmonthDailyData.concat(thismonthDailyData);
+        compThisMonthlyChart.clear();
+        compPrevMonthlyChart.clear();
+        compThisMonthlyChart.setupXaxis(allDailyData, thisyyyymm);
+        compPrevMonthlyChart.setupXaxis(allDailyData, prevyyyymm);
+        compThisMonthlyChart.setupLeftAxis(allDailyData);
+        compPrevMonthlyChart.setupLeftAxis(allDailyData);
+        compThisMonthlyChart.setupRightAxis(allDailyData);
+        compPrevMonthlyChart.setupRightAxis(allDailyData);
+        compThisMonthlyChart.drawBar(thismonthDailyData, lightColor, 0);
+        compThisMonthlyChart.drawLine(thismonthDailyData, accentColor, 0);
+        compPrevMonthlyChart.drawBar(prevmonthDailyData, lightColor, 0);
+        compPrevMonthlyChart.drawLine(prevmonthDailyData, accentColor, 0);
+
+        // 今年と前年のデータを重複比較表示
+        let prevyearMonthlyData = dataSet.rangeMonthlyData(prevyyyy, prevyyyy);
+        let allMonthlyData = prevyearMonthlyData.concat(thisyearMonthlyData);
+        compYearlyChart.clear();
+        compYearlyChart.setupXaxis(allMonthlyData, '');
+        compYearlyChart.setupRightAxis(allMonthlyData);
+        compYearlyChart.setupLeftAxis(allMonthlyData);
+        compYearlyChart.drawMultiBar(thisyearMonthlyData, prevyearMonthlyData, lightColor, 5);
+        compYearlyChart.drawMultiLine(thisyearMonthlyData, prevyearMonthlyData, accentColor, 5);
+        let prevyearDailyData = dataSet.rangeDailyData(`${prevyyyy}-01`, `${prevyyyy}-12`);
+        compYearlyHeatmap.clear();
+        compYearlyHeatmap.drawCalHeatmap(prevyearDailyData.concat(thisyearDailyData));
     }
 
     submitBtn.addEventListener('click', async () => {
@@ -287,15 +334,15 @@ window.onload = () => {
         }
     });
 
-    const compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
-    compTgl.addEventListener('change', async () => {
-        logging.debug('compare mode:', compTgl.checked);
-        loadingStart();
-        let thisYear = yearSlcter.value;
-        let thisMonth = monthSlcter.value;
-        await draw(thisYear, thisMonth);
-        loadingEnd();
-    });
+    // const compTgl = <HTMLInputElement>document.querySelector('#comp_toggle');
+    // compTgl.addEventListener('change', async () => {
+    //     logging.debug('compare mode:', compTgl.checked);
+    //     loadingStart();
+    //     let thisYear = yearSlcter.value;
+    //     let thisMonth = monthSlcter.value;
+    //     await draw(thisYear, thisMonth);
+    //     loadingEnd();
+    // });
 
 
 }

@@ -1,8 +1,10 @@
 import dayjs from "dayjs";
 import { Data } from "./Data";
+import { Logging } from "./Logging";
 
 export class DataSet {
     private _dataSet: { [YYYYMM: string]: Data } = {};
+    private logging: Logging = new Logging();
     public append(YYYYMM: string, data: Data) {
         this._dataSet[YYYYMM] = data;
     }

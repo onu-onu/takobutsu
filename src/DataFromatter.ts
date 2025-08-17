@@ -10,8 +10,7 @@ export class DataFromatter {
     private aggElectricEnergyData(rawData: any[], dayjsFormat: string): any {
         let tmp: any = {}
         rawData.forEach(d => {
-            let day: string = dayjs(d.startAt)
-                .tz('Asia/Tokyo')
+            let day: string = dayjs.utc(d.startAt)
                 .format(dayjsFormat);
             if (day in tmp) {
                 tmp[day] += Number(d.value);

@@ -3,6 +3,7 @@ const logging: Logging = new Logging();
 
 export class GraphQLFetcher {
     private ENDPOINT = 'https://api.oejp-kraken.energy/v1/graphql/';
+    private token = '';
 
     private fetchWrapper(query: string, variables: Object): Promise<any>;
     private fetchWrapper(query: string, variables: Object, token: string): Promise<any>;
@@ -40,19 +41,26 @@ export class GraphQLFetcher {
     public async getToken(email: string, passwd: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             logging.debug('start get token()');
-            try {
-                const query = `mutation login($input: ObtainJSONWebTokenInput!) {
+            if (this.token) {
+                logging.debug(`token still got. token=${this.token}`)
+                resolve(this.token);
+            } else {
+                try {
+                    const query = `mutation login($input: ObtainJSONWebTokenInput!) {
                     obtainKrakenToken(input: $input) {
                         token
                         refreshToken
                     }
                 }`;
-                const variables = { "input": { "email": email, "password": passwd } };
-                const headers = {};
-                let result = await this.fetchWrapper(query, variables);
-                resolve(result.data.obtainKrakenToken)
-            } catch (error) {
-                reject(`getToken():${error}`);
+                    const variables = { "input": { "email": email, "password": passwd } };
+                    const headers = {};
+                    let result = await this.fetchWrapper(query, variables);
+                    this.token = result.data.obtainKrakenToken;
+                    logging.debug(`success get token. token=${this.token}`)
+                    resolve(this.token);
+                } catch (error) {
+                    reject(`getToken(),${error}`);
+                }
             }
         });
     }

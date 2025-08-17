@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="./main.js"></script>
-    <script src="lib/onui.js"></script>
-    <link rel="stylesheet" href="lib/onui.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -101,13 +99,13 @@
             <button id="next">></button>
 
             <label for="toggle">前年/月比較</label>
-            <onui type="toggle-switch" id="comp_toggle"></onui>
+            <input type="checkbox" class="toggle" id="comp_toggle">
         </div>
 
         <div id="legend_pane" class="pane">
             <div>
-                <span class="rect blue"></span><span>使用電力量 (kWh)</span>
-                <span class="rect yellow"></span><span>概算料金 (円)</span>
+                <span class="rect blue-fill"></span><span>使用電力量 (kWh)</span>
+                <span class="rect yellow-fill"></span><span>概算料金 (円)</span>
             </div>
         </div>
 
@@ -116,11 +114,11 @@
             <div id="year_chart"></div>
             <div id="heatmap"></div>
         </div>
-        <div id="month_compare_chart">
+        <div id="compare_month_chart">
             <div id="prev_month_chart"></div>
             <div id="this_month_chart"></div>
         </div>
-        <div id="year_compare_charts">
+        <div id="compare_year_charts">
             <div id="year_compare_chart"></div>
             <div id="compare_heatmap"></div>
         </div>
